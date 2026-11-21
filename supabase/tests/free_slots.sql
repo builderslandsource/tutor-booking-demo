@@ -110,4 +110,22 @@ do $$ begin
   raise notice 'PASS: free_slots() returns start times only; visitors cannot pass their own now';
 end $$;
 
+-- Open time warning: upcoming active Bookings not on an open Slot, from the same rule as free_slots_at.
+delete from bookings; delete from exceptions; delete from weekly_hours;
+insert into weekly_hours (day_of_week, start_time, end_time) values (1, '16:00', '20:00'), (2, '16:00', '20:00'), (0, '10:00', '12:00');
+insert into bookings (slot_start, student_name, student_email) values
+  ('2027-03-01 17:00 Europe/London', 'In', 'in@example.com'),
+  ('2027-03-02 17:00 Europe/London', 'Out', 'out@example.com'),
+  ('2027-03-28 09:00Z', 'Clock in', 'ci@example.com'),   -- 10am BST on the spring clock-change Sunday
+  ('2027-03-28 11:00Z', 'Clock out', 'co@example.com');  -- 12pm BST, after Sunday 10am-12pm
+delete from weekly_hours where day_of_week = 2;
+do $$ declare got text[]; begin
+  select array_agg(student_name order by slot_start) into got from bookings_outside_open_time();
+  if got is distinct from array['Out', 'Clock out'] or (select status from bookings where student_name = 'Out') <> 'active'
+     or has_function_privilege('anon', 'bookings_outside_open_time()', 'execute')
+     or has_function_privilege('authenticated', 'open_slots(timestamptz, timestamptz)', 'execute') then
+    raise exception 'FAIL bookings outside open time: %', got; end if;
+  raise notice 'PASS: Bookings outside open time are listed (incl. clock-change day) and stay active; inside ones are not';
+end $$;
+
 rollback;

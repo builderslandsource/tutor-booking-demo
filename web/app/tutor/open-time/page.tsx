@@ -18,7 +18,6 @@ type Booking = { id: number; slot_start: string; student_name: string };
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];
 
-const minutes = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5));
 const hhmm = (t: string) => t.slice(0, 5);
 
 // Postgres interval text, e.g. "28 days", "12:00:00", "1 day 02:00:00", as whole hours.
@@ -26,37 +25,6 @@ function intervalHours(v: string) {
   const days = Number(v.match(/(\d+) days?/)?.[1] ?? 0);
   const hours = Number(v.match(/(\d+):\d\d:\d\d/)?.[1] ?? 0);
   return days * 24 + hours;
-}
-
-// Same rules as free_slots_at() in 0002, checked in the Tutor's local wall time:
-// a Booking is inside open time if a Weekly Hours or opening Exception window holds a Slot
-// starting at that time, and no closing Exception overlaps it.
-function insideOpenTime(b: Booking, tz: string, weekly: Weekly[], exceptions: Exception[]) {
-  const p = Object.fromEntries(
-    new Intl.DateTimeFormat("en-CA", {
-      timeZone: tz,
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      hourCycle: "h23",
-    })
-      .formatToParts(new Date(b.slot_start))
-      .map((x) => [x.type, x.value]),
-  );
-  const date = `${p.year}-${p.month}-${p.day}`;
-  const dow = new Date(date + "T00:00:00Z").getUTCDay();
-  const m = Number(p.hour) * 60 + Number(p.minute);
-  const holds = (w: { start_time: string; end_time: string }) =>
-    m >= minutes(w.start_time) && m + 60 <= minutes(w.end_time) && (m - minutes(w.start_time)) % 60 === 0;
-  const open =
-    weekly.some((w) => w.day_of_week === dow && holds(w)) ||
-    exceptions.some((e) => e.opens && e.date === date && holds(e));
-  const closed = exceptions.some(
-    (e) => !e.opens && e.date === date && m < minutes(e.end_time) && m + 60 > minutes(e.start_time),
-  );
-  return open && !closed;
 }
 
 const input = "border border-neutral-400 px-2 min-h-11";
@@ -84,25 +52,20 @@ function Kind({ opens }: { opens?: boolean }) {
 async function OpenTime({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const { error: message } = await searchParams;
   const supabase = await createClient();
-  const [settings, weekly, exceptions, bookings] = await Promise.all([
+  const [settings, weekly, exceptions, outside] = await Promise.all([
     supabase.from("settings").select("time_zone, minimum_notice, booking_horizon").single(),
     supabase.from("weekly_hours").select("id, day_of_week, start_time, end_time").order("start_time"),
     supabase.from("exceptions").select("id, date, start_time, end_time, opens").order("date").order("start_time"),
-    supabase
-      .from("bookings")
-      .select("id, slot_start, student_name")
-      .eq("status", "active")
-      .gte("slot_start", new Date().toISOString())
-      .order("slot_start"),
+    supabase.rpc("bookings_outside_open_time"),
   ]);
-  if (settings.error || weekly.error || exceptions.error || bookings.error)
+  if (settings.error || weekly.error || exceptions.error || outside.error)
     throw new Error("Could not load open time");
 
   const tz = settings.data.time_zone as string;
   const zone = tz.split("/").pop()!.replace(/_/g, " ");
   const hours = weekly.data as Weekly[];
   const exc = exceptions.data as Exception[];
-  const affected = (bookings.data as Booking[]).filter((b) => !insideOpenTime(b, tz, hours, exc));
+  const affected = outside.data as Booking[];
 
   return (
     <div className="space-y-8">
