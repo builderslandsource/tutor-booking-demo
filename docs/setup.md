@@ -7,6 +7,7 @@ Only the Tutor can log in. There is no sign-up page, so the Tutor user is create
 1. Turn off sign-ups: Authentication → Sign In / Providers → turn off "Allow new users to sign up" → Save.
 2. Create the Tutor user: Authentication → Users → Add user → Create new user. Enter the Tutor's email and a strong password, tick "Auto Confirm User", then Create user.
 3. Check: Authentication → Users lists exactly one user, the Tutor.
+4. Password resets are done here, not in the app: Authentication → Users → pick the Tutor → set a new password.
 
 ## Local Supabase
 
