@@ -62,6 +62,20 @@ do $$ begin
   raise notice 'PASS: Slot comes back once its Booking is cancelled';
 end $$;
 
+-- A Booking blocks any Slot overlapping its hour, even after Weekly Hours shift.
+insert into bookings (slot_start, student_name, student_email) values ('2027-03-01 17:00 Europe/London', 'B', 'b@example.com');
+update weekly_hours set start_time = '16:30', end_time = '20:30' where day_of_week = 1;
+do $$ declare got timestamptz[]; begin
+  select array_agg(s order by s) into got from free_slots_at('2027-02-27 12:00 Europe/London') s
+    where (s at time zone 'Europe/London')::date = '2027-03-01';
+  if got <> array['2027-03-01 18:30 Europe/London', '2027-03-01 19:30 Europe/London']::timestamptz[]
+     or (select status from bookings where student_name = 'B') <> 'active' then
+    raise exception 'FAIL overlapping booking: %', got; end if;
+  raise notice 'PASS: Slots overlapping an active Booking are left out after Weekly Hours change; Booking stays active';
+end $$;
+delete from bookings where student_name = 'B';
+update weekly_hours set start_time = '16:00', end_time = '20:00' where day_of_week = 1;
+
 -- Clock changes: Sunday 2027-03-28 (to BST, UTC+1) and Sunday 2027-10-31 (to GMT, UTC+0).
 insert into weekly_hours (day_of_week, start_time, end_time) values (0, '10:00', '12:00');
 do $$ declare got timestamptz[]; begin
@@ -76,6 +90,15 @@ do $$ declare got timestamptz[]; begin
                   '2027-11-01 18:00Z', '2027-11-01 19:00Z']::timestamptz[] then
     raise exception 'FAIL autumn clock change: %', got; end if;
   raise notice 'PASS: on clock-change dates Slots keep their local times (10am, 11am Sunday; 4-7pm Monday)';
+end $$;
+
+-- Hours covering the missing local hour (01:00-02:00 on 28 Mar) give no duplicate Slots.
+insert into exceptions (date, start_time, end_time, opens) values ('2027-03-28', '00:00', '03:00', true);
+do $$ declare n int; d int; begin
+  select count(*), count(distinct s) into n, d from free_slots_at('2027-03-20 12:00Z') s
+    where s < '2027-03-28 03:00Z';
+  if n <> d or n = 0 then raise exception 'FAIL spring gap duplicates: % rows, % distinct', n, d; end if;
+  raise notice 'PASS: no duplicate Slots across the missing hour at the spring clock change';
 end $$;
 
 do $$ begin
