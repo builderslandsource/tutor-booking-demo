@@ -13,7 +13,11 @@ export function formatSlot(start: Date | string, timeZone: string): string {
       .formatToParts(new Date(start))
       .map((p) => [p.type, p.value]),
   );
-  const city = timeZone.split("/").pop()!.replace(/_/g, " ");
   const hour = parts.hour === "0" ? "12" : parts.hour;
-  return `${parts.weekday} ${parts.day} ${parts.month}, ${hour}:${parts.minute}${parts.dayPeriod.toLowerCase()} (${city} time)`;
+  return `${parts.weekday} ${parts.day} ${parts.month}, ${hour}:${parts.minute}${parts.dayPeriod.toLowerCase()} (${zoneCity(timeZone)} time)`;
+}
+
+// "Europe/London" -> "London", used in every "(London time)" label.
+export function zoneCity(timeZone: string): string {
+  return timeZone.split("/").pop()!.replace(/_/g, " ");
 }

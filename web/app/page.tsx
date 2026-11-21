@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { getFreeSlots } from "@/app/book/actions";
 import { BookingSheet } from "@/components/booking/booking-sheet";
 import { createClient } from "@/lib/supabase/server";
+import { zoneCity } from "@/lib/time";
 
 async function Sheet() {
   const supabase = await createClient();
@@ -13,23 +14,22 @@ async function Sheet() {
   const slots = await getFreeSlots();
 
   return (
-    <>
-      <h1 className="text-2xl font-semibold border-b border-neutral-900 pb-3">
-        {data.display_name}
-      </h1>
+    <div className="lg:grid lg:grid-cols-[minmax(16rem,20rem)_1fr] lg:gap-16">
+      <header className="border-b border-rule pb-6 lg:sticky lg:top-16 lg:self-start lg:border-0">
+        <h1 className="font-serif text-4xl leading-tight lg:text-5xl xl:text-6xl">{data.display_name}</h1>
+        <p className="mt-2 text-ink-soft">All times in {zoneCity(data.time_zone)} time</p>
+      </header>
       <BookingSheet slots={slots} tutor={data.display_name} timeZone={data.time_zone} />
-    </>
+    </div>
   );
 }
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-white text-neutral-950">
-      <div className="mx-auto max-w-md px-4 py-8">
-        <Suspense>
-          <Sheet />
-        </Suspense>
-      </div>
+    <main className="mx-auto min-h-screen max-w-[90rem] px-6 py-10 lg:px-12 lg:py-16">
+      <Suspense>
+        <Sheet />
+      </Suspense>
     </main>
   );
 }

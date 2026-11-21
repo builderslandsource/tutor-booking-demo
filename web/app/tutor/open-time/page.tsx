@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
-import { formatSlot } from "@/lib/time";
+import { formatSlot, zoneCity } from "@/lib/time";
 import {
   addException,
   addWeekly,
@@ -27,16 +27,18 @@ function intervalHours(v: string) {
   return days * 24 + hours;
 }
 
-const input = "border border-neutral-400 px-2 min-h-11";
-const button = "border border-neutral-900 px-3 min-h-11";
+const input = "field min-h-11";
+const button = "btn";
+const remove = "text-action px-2";
+const sectionTitle = "border-b border-ink pb-2 font-serif text-2xl";
 
 function Times({ start = "", end = "" }: { start?: string; end?: string }) {
   return (
-    <>
+    <span className="inline-flex items-center gap-2">
       <input type="time" name="start" defaultValue={start} required aria-label="Start time" className={input} />
-      <span>to</span>
+      <span className="text-ink-soft">to</span>
       <input type="time" name="end" defaultValue={end} required aria-label="End time" className={input} />
-    </>
+    </span>
   );
 }
 
@@ -62,26 +64,28 @@ async function OpenTime({ searchParams }: { searchParams: Promise<{ error?: stri
     throw new Error("Could not load open time");
 
   const tz = settings.data.time_zone as string;
-  const zone = tz.split("/").pop()!.replace(/_/g, " ");
+  const zone = zoneCity(tz);
   const hours = weekly.data as Weekly[];
   const exc = exceptions.data as Exception[];
   const affected = outside.data as Booking[];
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-2xl font-semibold border-b border-neutral-900 pb-3">Open time</h1>
-      <p>All times in {zone} time.</p>
+    <div className="space-y-12 pt-8">
+      <header>
+        <h1 className="border-b border-ink pb-3 font-serif text-3xl lg:text-4xl">Open time</h1>
+        <p className="mt-3 text-ink-soft">All times in {zone} time.</p>
+      </header>
 
       {message && (
-        <p role="alert" className="border border-neutral-900 p-3">
+        <p role="alert" className="ink-note max-w-prose">
           {message}
         </p>
       )}
 
       {affected.length > 0 && (
-        <section role="alert" className="border-2 border-neutral-900 p-3 space-y-2">
+        <section role="alert" className="max-w-prose space-y-2 border-l-4 border-ink py-1 pl-4">
           <h2 className="font-semibold">These Bookings are outside your open time:</h2>
-          <ul>
+          <ul className="tabular-nums">
             {affected.map((b) => (
               <li key={b.id}>
                 {formatSlot(b.slot_start, tz)}, {b.student_name}
@@ -92,59 +96,61 @@ async function OpenTime({ searchParams }: { searchParams: Promise<{ error?: stri
         </section>
       )}
 
-      <section>
-        <h2 className="text-lg font-semibold border-b border-neutral-900 pb-2">Weekly Hours ({zone} time)</h2>
-        {WEEK_ORDER.map((day) => (
-          <div key={day} className="border-b border-neutral-300 py-3 space-y-2">
-            <h3 className="font-medium">{DAYS[day]}</h3>
-            {hours
-              .filter((w) => w.day_of_week === day)
-              .map((w) => (
-                <form key={w.id} action={saveWeekly} className="flex flex-wrap items-center gap-2">
-                  <input type="hidden" name="id" value={w.id} />
-                  <Times start={hhmm(w.start_time)} end={hhmm(w.end_time)} />
-                  <button className={button}>Save</button>
-                  <button formAction={removeWeekly} formNoValidate className={button}>
-                    Remove
-                  </button>
-                </form>
-              ))}
-            <form action={addWeekly} className="flex flex-wrap items-center gap-2">
-              <input type="hidden" name="day" value={day} />
-              <Times />
-              <button className={button}>Add</button>
+      <div className="grid items-start gap-12 lg:grid-cols-2 lg:gap-16">
+        <section>
+          <h2 className={sectionTitle}>Weekly Hours ({zone} time)</h2>
+          {WEEK_ORDER.map((day) => (
+            <div key={day} className="space-y-2 border-b border-rule py-4">
+              <h3 className="caps">{DAYS[day]}</h3>
+              {hours
+                .filter((w) => w.day_of_week === day)
+                .map((w) => (
+                  <form key={w.id} action={saveWeekly} className="flex flex-wrap items-center gap-2">
+                    <input type="hidden" name="id" value={w.id} />
+                    <Times start={hhmm(w.start_time)} end={hhmm(w.end_time)} />
+                    <button className={button}>Save</button>
+                    <button formAction={removeWeekly} formNoValidate className={remove}>
+                      Remove
+                    </button>
+                  </form>
+                ))}
+              <form action={addWeekly} className="flex flex-wrap items-center gap-2">
+                <input type="hidden" name="day" value={day} />
+                <Times />
+                <button className={button}>Add</button>
+              </form>
+            </div>
+          ))}
+        </section>
+
+        <section>
+          <h2 className={sectionTitle}>Exceptions ({zone} time)</h2>
+          {exc.map((e) => (
+            <form key={e.id} action={saveException} className="flex flex-wrap items-center gap-2 border-b border-rule py-4">
+              <input type="hidden" name="id" value={e.id} />
+              <input type="date" name="date" defaultValue={e.date} required aria-label="Date" className={input} />
+              <Kind opens={e.opens} />
+              <Times start={hhmm(e.start_time)} end={hhmm(e.end_time)} />
+              <button className={button}>Save</button>
+              <button formAction={removeException} formNoValidate className={remove}>
+                Remove
+              </button>
             </form>
-          </div>
-        ))}
-      </section>
-
-      <section>
-        <h2 className="text-lg font-semibold border-b border-neutral-900 pb-2">Exceptions ({zone} time)</h2>
-        {exc.map((e) => (
-          <form key={e.id} action={saveException} className="flex flex-wrap items-center gap-2 border-b border-neutral-300 py-3">
-            <input type="hidden" name="id" value={e.id} />
-            <input type="date" name="date" defaultValue={e.date} required aria-label="Date" className={input} />
-            <Kind opens={e.opens} />
-            <Times start={hhmm(e.start_time)} end={hhmm(e.end_time)} />
-            <button className={button}>Save</button>
-            <button formAction={removeException} formNoValidate className={button}>
-              Remove
-            </button>
+          ))}
+          <form action={addException} className="flex flex-wrap items-center gap-2 py-4">
+            <input type="date" name="date" required aria-label="Date" className={input} />
+            <Kind />
+            <Times />
+            <button className={button}>Add Exception</button>
           </form>
-        ))}
-        <form action={addException} className="flex flex-wrap items-center gap-2 py-3">
-          <input type="date" name="date" required aria-label="Date" className={input} />
-          <Kind />
-          <Times />
-          <button className={button}>Add Exception</button>
-        </form>
-      </section>
+        </section>
+      </div>
 
-      <section>
-        <h2 className="text-lg font-semibold border-b border-neutral-900 pb-2">Settings</h2>
-        <form action={saveSettings} className="space-y-3 py-3">
-          <label className="flex items-center gap-2">
-            Minimum Notice
+      <section className="max-w-prose">
+        <h2 className={sectionTitle}>Settings</h2>
+        <form action={saveSettings} className="space-y-1 py-2">
+          <label className="flex min-h-14 items-center gap-3 border-b border-rule">
+            <span className="w-40">Minimum Notice</span>
             <input
               type="number"
               name="notice"
@@ -153,12 +159,12 @@ async function OpenTime({ searchParams }: { searchParams: Promise<{ error?: stri
               step={1}
               required
               defaultValue={intervalHours(settings.data.minimum_notice)}
-              className={`${input} w-24`}
+              className={`${input} w-24 tabular-nums`}
             />
             hours
           </label>
-          <label className="flex items-center gap-2">
-            Booking Horizon
+          <label className="flex min-h-14 items-center gap-3 border-b border-rule">
+            <span className="w-40">Booking Horizon</span>
             <input
               type="number"
               name="horizon"
@@ -167,11 +173,13 @@ async function OpenTime({ searchParams }: { searchParams: Promise<{ error?: stri
               step={1}
               required
               defaultValue={Math.round(intervalHours(settings.data.booking_horizon) / 168)}
-              className={`${input} w-24`}
+              className={`${input} w-24 tabular-nums`}
             />
             weeks
           </label>
-          <button className={button}>Save settings</button>
+          <div className="pt-4">
+            <button className={button}>Save settings</button>
+          </div>
         </form>
       </section>
     </div>
@@ -180,12 +188,10 @@ async function OpenTime({ searchParams }: { searchParams: Promise<{ error?: stri
 
 export default function OpenTimePage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   return (
-    <main className="min-h-screen bg-white text-neutral-950">
-      <div className="mx-auto max-w-md px-4 py-8">
-        <Suspense>
-          <OpenTime searchParams={searchParams} />
-        </Suspense>
-      </div>
+    <main>
+      <Suspense>
+        <OpenTime searchParams={searchParams} />
+      </Suspense>
     </main>
   );
 }

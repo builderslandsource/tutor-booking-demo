@@ -5,6 +5,16 @@ import { book, type BookState } from "@/app/book/actions";
 import { formatSlot } from "@/lib/time";
 
 type Props = { slots: string[]; tutor: string; timeZone: string };
+type Row = { iso: string; clock: string; zone: string };
+
+// Monday of the Slot's week, in the Tutor's time zone, as "YYYY-MM-DD".
+function weekOf(iso: string, timeZone: string) {
+  const ymd = new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" })
+    .format(new Date(iso));
+  const d = new Date(`${ymd}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
+  return d.toISOString().slice(0, 10);
+}
 
 export function BookingSheet({ slots, tutor, timeZone }: Props) {
   const [state, action, pending] = useActionState<BookState, FormData>(book, { slots });
@@ -12,12 +22,13 @@ export function BookingSheet({ slots, tutor, timeZone }: Props) {
 
   if (state.status === "booked" && state.slot) {
     return (
-      <section className="py-6" aria-live="polite">
+      <section className="py-8 lg:py-2" aria-live="polite">
         <p className="text-lg">You&apos;re booked for</p>
-        <p className="text-3xl font-semibold tabular-nums text-blue-700 border-b-2 border-blue-700 py-2">
+        <p className="mt-3 text-3xl font-semibold tabular-nums text-pen lg:text-4xl">
           {formatSlot(state.slot, timeZone)}
         </p>
-        <p className="mt-4">To cancel, message {tutor}</p>
+        <span aria-hidden="true" className="mt-3 block h-0.5 origin-left bg-pen motion-safe:animate-ink-in" />
+        <p className="mt-6 text-ink-soft">To cancel, message {tutor}</p>
       </section>
     );
   }
@@ -29,71 +40,84 @@ export function BookingSheet({ slots, tutor, timeZone }: Props) {
         ? "That time is no longer free. Please pick another time."
         : null;
 
-  // Group rows by day: "Mon 30 Mar" heading, "5:00pm (London time)" row.
-  const days = new Map<string, { iso: string; time: string }[]>();
+  // Group by week, then by day: "Mon 30 Mar" heading, "5:00pm (London time)" row.
+  const weeks = new Map<string, Map<string, Row[]>>();
   for (const iso of state.slots) {
     const [day, time] = formatSlot(iso, timeZone).split(", ");
-    days.set(day, [...(days.get(day) ?? []), { iso, time }]);
+    const [clock, zone] = time.split(" (");
+    const week = weekOf(iso, timeZone);
+    const days = weeks.get(week) ?? new Map<string, Row[]>();
+    days.set(day, [...(days.get(day) ?? []), { iso, clock, zone: `(${zone}` }]);
+    weeks.set(week, days);
   }
 
   return (
-    <section>
+    <section className="pt-2 lg:pt-0">
       {notice && (
-        <p role="alert" className="py-3 border-b border-neutral-300 font-medium">
+        <p role="alert" className="ink-note my-4">
           {notice}
         </p>
       )}
       {state.slots.length === 0 ? (
-        <p className="py-12 text-lg">No open times right now, please message {tutor}</p>
+        <p className="max-w-[34ch] py-16 text-xl leading-relaxed lg:py-4">
+          No open times right now, please message {tutor}
+        </p>
       ) : (
-        [...days].map(([day, rows]) => (
-          <div key={day}>
-            <h2 className="pt-6 pb-1 text-sm font-medium border-b border-neutral-900">{day}</h2>
-            <ul>
-              {rows.map(({ iso, time }) => (
-                <li key={iso} className="border-b border-neutral-300">
-                  <button
-                    type="button"
-                    onClick={() => setSelected(iso)}
-                    aria-expanded={selected === iso}
-                    className="w-full min-h-11 py-3 text-left text-2xl font-semibold tabular-nums text-blue-700"
-                  >
-                    {time}
-                  </button>
-                  {selected === iso && (
-                    <form action={action} className="pb-4 flex flex-col gap-3">
-                      <input type="hidden" name="slot" value={iso} />
-                      {/* Bot trap: hidden from people, bots fill it in and the Booking is refused. */}
-                      <div className="sr-only" aria-hidden="true">
-                        <label>
-                          Website
-                          <input type="text" name="website" tabIndex={-1} autoComplete="off" />
-                        </label>
-                      </div>
-                      <label className="flex flex-col gap-1">
-                        Name
-                        <input name="name" required defaultValue={state.name} autoComplete="name"
-                          className="min-h-11 border border-neutral-900 px-2" />
-                      </label>
-                      <label className="flex flex-col gap-1">
-                        Email
-                        <input name="email" type="email" required defaultValue={state.email} autoComplete="email"
-                          className="min-h-11 border border-neutral-900 px-2" />
-                      </label>
-                      {state.status === "invalid" && state.slot === iso && (
-                        <p role="alert">Please enter your name and a valid email.</p>
-                      )}
-                      <button type="submit" disabled={pending}
-                        className="min-h-11 bg-blue-700 text-white font-semibold disabled:opacity-70">
-                        {pending ? "Booking…" : `Book ${formatSlot(iso, timeZone)}`}
-                      </button>
-                    </form>
-                  )}
-                </li>
+        <div className="space-y-14">
+          {[...weeks].map(([week, days]) => (
+            <div key={week} className="grid items-start gap-x-10 gap-y-8 sm:grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] lg:grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] lg:gap-x-8">
+              {[...days].map(([day, rows]) => (
+                <div key={day} className="min-w-0">
+                  <h2 className="caps -mx-3 border-b border-ink px-3 pb-2 pt-4">{day}</h2>
+                  <ul>
+                    {rows.map(({ iso, clock, zone }) => (
+                      <li key={iso} className={`-mx-3 border-b border-rule px-3 ${selected === iso ? "bg-pen-tint" : ""}`}>
+                        <button
+                          type="button"
+                          onClick={() => setSelected(iso)}
+                          aria-expanded={selected === iso}
+                          className="group flex min-h-14 w-full items-baseline gap-2 py-3 text-left lg:flex-col lg:items-start lg:gap-0"
+                        >
+                          <span className="text-[22px] font-semibold tabular-nums text-pen decoration-2 underline-offset-4 group-hover:underline">
+                            {clock}
+                          </span>
+                          <span className="text-sm text-ink-soft">{zone}</span>
+                        </button>
+                        {selected === iso && (
+                          <form action={action} className="grid gap-4 overflow-hidden pb-5 pt-1 motion-safe:animate-line-open">
+                            <input type="hidden" name="slot" value={iso} />
+                            {/* Bot trap: hidden from people, bots fill it in and the Booking is refused. */}
+                            <div className="sr-only" aria-hidden="true">
+                              <label>
+                                Website
+                                <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+                              </label>
+                            </div>
+                            <label className="grid gap-1 text-sm font-medium">
+                              Name
+                              <input name="name" required defaultValue={state.name} autoComplete="name" className="field w-full min-w-0 font-normal" />
+                            </label>
+                            <label className="grid gap-1 text-sm font-medium">
+                              Email
+                              <input name="email" type="email" required defaultValue={state.email} autoComplete="email"
+                                className="field w-full min-w-0 font-normal" />
+                            </label>
+                            {state.status === "invalid" && state.slot === iso && (
+                              <p role="alert" className="ink-note text-sm">Please enter your name and a valid email.</p>
+                            )}
+                            <button type="submit" disabled={pending} aria-busy={pending} className="btn-book w-full">
+                              {pending ? "Booking…" : `Book ${formatSlot(iso, timeZone)}`}
+                            </button>
+                          </form>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ))}
-            </ul>
-          </div>
-        ))
+            </div>
+          ))}
+        </div>
       )}
     </section>
   );

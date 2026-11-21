@@ -7,17 +7,18 @@ type Booking = { id: number; slot_start: string; student_name: string; student_e
 
 function Row({ b, timeZone, done }: { b: Booking; timeZone: string; done?: boolean }) {
   return (
-    <li className="border-b border-neutral-300 py-3">
-      <div className={done ? "line-through decoration-neutral-950" : ""}>
-        <p className="text-xl font-semibold tabular-nums">{formatSlot(b.slot_start, timeZone)}</p>
-        <p>{b.student_name} · {b.student_email}{done && b.status === "cancelled" ? " · cancelled" : ""}</p>
+    <li className="grid gap-x-8 border-b border-rule py-3 lg:grid-cols-[21rem_minmax(0,1fr)_minmax(0,1.3fr)_9rem] lg:items-center">
+      <div className={`contents ${done ? "[&>*]:line-through [&>*]:decoration-ink" : ""}`}>
+        <p className="text-lg font-semibold tabular-nums lg:whitespace-nowrap">{formatSlot(b.slot_start, timeZone)}</p>
+        <p className="break-words">{b.student_name}{done && b.status === "cancelled" ? " · cancelled" : ""}</p>
+        <p className="break-words text-ink-soft">{b.student_email}</p>
       </div>
       {!done && (
-        <details className="mt-1">
-          <summary className="inline-flex min-h-11 items-center cursor-pointer underline">Cancel</summary>
+        <details className="lg:justify-self-end">
+          <summary className="text-action">Cancel</summary>
           <form action={cancelBooking} className="inline">
             <input type="hidden" name="id" value={b.id} />
-            <button className="min-h-11 px-3 border border-neutral-900">Yes, cancel this Booking</button>
+            <button className="btn ml-3">Yes, cancel this Booking</button>
           </form>
         </details>
       )}
@@ -47,19 +48,19 @@ async function Bookings() {
   return (
     <>
       {soon.length === 0 ? (
-        <p className="py-6">No Bookings in the next two weeks.</p>
+        <p className="py-8 text-lg">No Bookings in the next two weeks.</p>
       ) : (
         <ul>{soon.map((b) => <Row key={b.id} b={b} timeZone={tz} />)}</ul>
       )}
       {later.length > 0 && (
-        <details className="py-3">
-          <summary className="min-h-11 cursor-pointer underline">Later ({later.length})</summary>
+        <details className="pt-4">
+          <summary className="text-action">Later ({later.length})</summary>
           <ul>{later.map((b) => <Row key={b.id} b={b} timeZone={tz} />)}</ul>
         </details>
       )}
-      <h2 className="pt-8 pb-1 text-sm font-medium border-b border-neutral-900">Cancelled and past</h2>
+      <h2 className="caps mt-14 border-b border-ink pb-2">Cancelled and past</h2>
       {done.length === 0 ? (
-        <p className="py-3">None yet.</p>
+        <p className="py-4">None yet.</p>
       ) : (
         <ul>{done.map((b) => <Row key={b.id} b={b} timeZone={tz} done />)}</ul>
       )}
@@ -69,13 +70,11 @@ async function Bookings() {
 
 export default function BookingsPage() {
   return (
-    <main className="min-h-screen bg-white text-neutral-950">
-      <div className="mx-auto max-w-md px-4 py-8">
-        <h1 className="text-2xl font-semibold border-b border-neutral-900 pb-3">Bookings</h1>
-        <Suspense>
-          <Bookings />
-        </Suspense>
-      </div>
+    <main className="pt-8">
+      <h1 className="border-b border-ink pb-3 font-serif text-3xl lg:text-4xl">Bookings</h1>
+      <Suspense>
+        <Bookings />
+      </Suspense>
     </main>
   );
 }

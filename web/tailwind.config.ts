@@ -11,7 +11,17 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+        serif: ["var(--font-serif)", "Georgia", "serif"],
+      },
       colors: {
+        // The Door Sheet palette (DESIGN-BRIEF.md section 3).
+        paper: "#FAF7F2",
+        ink: { DEFAULT: "#1F2430", soft: "#5B6170" },
+        pen: { DEFAULT: "#1D4ED8", tint: "#EEF2FD" },
+        rule: "#D9D2C5",
+        field: "#8A8478",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
@@ -45,18 +55,26 @@ export default {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
-        chart: {
-          "1": "hsl(var(--chart-1))",
-          "2": "hsl(var(--chart-2))",
-          "3": "hsl(var(--chart-3))",
-          "4": "hsl(var(--chart-4))",
-          "5": "hsl(var(--chart-5))",
-        },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      keyframes: {
+        // The only motion: a line opening, and the ink filling in.
+        "line-open": {
+          from: { maxHeight: "0", opacity: "0" },
+          to: { maxHeight: "40rem", opacity: "1" },
+        },
+        "ink-in": {
+          from: { transform: "scaleX(0)" },
+          to: { transform: "scaleX(1)" },
+        },
+      },
+      animation: {
+        "line-open": "line-open 240ms ease-out",
+        "ink-in": "ink-in 600ms ease-out",
       },
     },
   },

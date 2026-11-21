@@ -2,35 +2,28 @@
 
 import { useActionState } from "react";
 import { login } from "./actions";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 export function LoginForm() {
   const [error, action, pending] = useActionState(login, null);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-2xl">Tutor login</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form action={action} className="flex flex-col gap-6">
-          <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" name="email" type="email" required />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="password">Password</Label>
-            <Input id="password" name="password" type="password" required />
-          </div>
-          {error && <p role="alert" className="text-sm text-red-500">{error}</p>}
-          <Button type="submit" className="w-full" disabled={pending}>
-            {pending ? "Logging in..." : "Login"}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+    <>
+      <h1 className="border-b border-ink pb-3 font-serif text-3xl">Tutor login</h1>
+      <form action={action} className="mt-8 flex flex-col gap-6">
+        <label className="grid gap-1 text-sm font-medium">
+          Email
+          <input id="email" name="email" type="email" required autoComplete="username" className="field font-normal" />
+        </label>
+        <label className="grid gap-1 text-sm font-medium">
+          Password
+          <input id="password" name="password" type="password" required autoComplete="current-password"
+            className="field font-normal" />
+        </label>
+        {error && <p role="alert" className="ink-note text-sm">{error}</p>}
+        <button type="submit" className="btn w-full" disabled={pending} aria-busy={pending}>
+          {pending ? "Logging in..." : "Login"}
+        </button>
+      </form>
+    </>
   );
 }

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Newsreader, Public_Sans } from "next/font/google";
 import "./globals.css";
 
 const defaultUrl = process.env.VERCEL_URL
@@ -12,8 +12,14 @@ export const metadata: Metadata = {
   description: "Pick a free time and book a 60-minute Lesson.",
 };
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const sans = Public_Sans({
+  variable: "--font-sans",
+  display: "swap",
+  subsets: ["latin"],
+});
+
+const serif = Newsreader({
+  variable: "--font-serif",
   display: "swap",
   subsets: ["latin"],
 });
@@ -25,7 +31,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.className} antialiased`}>
+      <body className={`${sans.variable} ${serif.variable} font-sans antialiased`}>
         {children}
       </body>
     </html>
