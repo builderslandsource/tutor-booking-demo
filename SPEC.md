@@ -12,7 +12,7 @@ A Student books a free 60-minute Slot with their name and email. Two Students ca
 ## Screens
 | Screen | Who sees it | What they do there |
 |---|---|---|
-| Booking page | anyone | See the free Slots for the next 4 weeks, each time labeled with the Tutor's time zone, and pick one |
+| Booking page | anyone | See the free Slots for the next 4 weeks, one week at a time, under one clear label naming the Tutor's time zone, and pick one |
 | Booking form | anyone | Enter name and email (both required) for the chosen Slot and confirm |
 | Confirmation | anyone | See the booked date and time (with time zone) and "To cancel, message [Tutor]" |
 | Login | Tutor | Log in with the password |
@@ -42,7 +42,7 @@ Student names and emails are kept indefinitely in this version.
 - Two active Bookings hold the same Slot.
 - A Slot is offered or booked outside open time, inside the Minimum Notice, or beyond the Booking Horizon.
 - A change to Weekly Hours or Exceptions cancels a Booking. Only the Tutor cancelling ends a Booking.
-- A time is shown without its time zone label.
+- A time is shown without its time zone label. A time counts as labeled when it carries its own label, or when it sits in a group of times under one clear label for the whole group (such as "All times in London time" above the Slot chips). The confirmation and the Tutor's lists label every time.
 - Anyone except the Tutor can log in, or create an account.
 
 ## Out of scope (not in this version)

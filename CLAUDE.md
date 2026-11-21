@@ -15,7 +15,7 @@ A booking page where Students book 60-minute Lessons with a Tutor who works alon
 - Two active Bookings hold the same Slot.
 - A Slot is offered or booked outside open time, inside the Minimum Notice, or beyond the Booking Horizon.
 - A change to Weekly Hours or Exceptions cancels a Booking. Only the Tutor cancelling ends a Booking.
-- A time is shown without its time zone label.
+- A time is shown without its time zone label. A time counts as labeled when it carries its own label, or when it sits in a group of times under one clear label for the whole group (such as "All times in London time" above the Slot chips). The confirmation and the Tutor's lists label every time.
 - Anyone except the Tutor can log in, or create an account.
 
 ## How to build
