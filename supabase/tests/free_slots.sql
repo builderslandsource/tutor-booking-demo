@@ -119,6 +119,9 @@ insert into bookings (slot_start, student_name, student_email) values
   ('2027-03-28 09:00Z', 'Clock in', 'ci@example.com'),   -- 10am BST on the spring clock-change Sunday
   ('2027-03-28 11:00Z', 'Clock out', 'co@example.com');  -- 12pm BST, after Sunday 10am-12pm
 delete from weekly_hours where day_of_week = 2;
+-- bookings_outside_open_time() answers only the Tutor.
+update settings set tutor_id = '00000000-0000-0000-0000-000000000001';
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-000000000001","role":"authenticated"}', true);
 do $$ declare got text[]; begin
   select array_agg(student_name order by slot_start) into got from bookings_outside_open_time();
   if got is distinct from array['Out', 'Clock out'] or (select status from bookings where student_name = 'Out') <> 'active'

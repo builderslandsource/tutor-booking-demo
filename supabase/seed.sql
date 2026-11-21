@@ -30,6 +30,7 @@ begin
     values (v_id::text, v_id, jsonb_build_object('sub', v_id::text, 'email', v_email, 'email_verified', true),
             'email', now(), now(), now());
   end if;
+  update settings set tutor_id = v_id;
 end $$;
 
 update login_lockout set failed_count = 0, locked_until = null;

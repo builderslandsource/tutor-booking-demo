@@ -7,13 +7,15 @@ Only the Tutor can log in. There is no sign-up page, so the Tutor user is create
 1. Turn off sign-ups: Authentication → Sign In / Providers → turn off "Allow new users to sign up" → Save.
 2. Create the Tutor user: Authentication → Users → Add user → Create new user. Enter the Tutor's email and a strong password, tick "Auto Confirm User", then Create user.
 3. Check: Authentication → Users lists exactly one user, the Tutor.
-4. Password resets are done here, not in the app: Authentication → Users → pick the Tutor → set a new password.
+4. Make that user the Tutor, or nobody can see the Bookings: SQL Editor → run `update settings set tutor_id = (select id from auth.users where email = 'TUTOR_EMAIL');` with the Tutor's email. Pushing the migrations after the user exists does this for you. Do it again if you ever delete and recreate the Tutor user.
+5. Password resets are done here, not in the app: Authentication → Users → pick the Tutor → set a new password.
 
 ## Local Supabase
 
 1. In `supabase/config.toml`, under `[auth]`, set `enable_signup = false`, then restart (`supabase stop && supabase start`).
 2. Create the Tutor user in the local Studio (http://localhost:54723): Authentication → Users → Add user, with "Auto Confirm User" ticked.
-   Or load the demo data below, which creates the Tutor user for you.
+   Then make it the Tutor with the SQL from step 4 above (Studio → SQL Editor).
+   Or load the demo data below, which creates the Tutor user and makes it the Tutor for you.
 
 ## Local demo data
 

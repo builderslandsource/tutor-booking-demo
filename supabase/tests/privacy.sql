@@ -13,6 +13,11 @@ insert into exceptions (date, start_time, end_time, opens) values (current_date 
 insert into bookings (slot_start, student_name, student_email)
   select max(f), 'Secret Sam', 'sam@example.com' from free_slots() f;
 select set_config('test.sam_slot', (select slot_start::text from bookings), true);
+-- A Booking outside open time (02:00 UTC is before 08:00 London), so bookings_outside_open_time() has a row.
+insert into bookings (slot_start, student_name, student_email)
+  values (date_trunc('day', now()) + interval '200 days 2 hours', 'Night Nia', 'nia@example.com');
+-- The Tutor is the user ...0001 below; ...0002 is another logged-in user.
+update settings set tutor_id = '00000000-0000-0000-0000-000000000001';
 
 -- Privilege checks only: setval is not undone by rollback, so never call it here.
 do $$
@@ -113,6 +118,44 @@ end $$;
 
 reset role;
 
+-- Another logged-in user who is not the Tutor: sees and changes nothing.
+set local role authenticated;
+set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-000000000002","role":"authenticated"}';
+
+do $$
+declare t text; sql text; n bigint;
+begin
+  foreach t in array array['bookings', 'weekly_hours', 'exceptions', 'settings'] loop
+    execute format('select count(*) from %I', t) into n;
+    if n > 0 then raise exception 'FAIL other user read % rows from %', n, t; end if;
+  end loop;
+  if exists (select 1 from bookings_outside_open_time()) then
+    raise exception 'FAIL other user read bookings_outside_open_time()'; end if;
+  raise notice 'PASS: other user reads no rows from bookings, weekly_hours, exceptions, settings';
+
+  foreach sql in array array[
+    'insert into bookings (slot_start, student_name, student_email) values (now() + interval ''300 days'', ''X'', ''x@example.com'')',
+    'insert into weekly_hours (day_of_week, start_time, end_time) values (1, ''06:00'', ''07:00'')',
+    'insert into exceptions (date, start_time, end_time, opens) values (current_date + 5, ''21:00'', ''22:00'', true)'] loop
+    begin
+      execute sql;
+      raise exception 'FAIL other user allowed: %', sql;
+    exception when insufficient_privilege then null;
+    end;
+  end loop;
+  foreach sql in array array[
+    'update bookings set status = ''cancelled''', 'update weekly_hours set day_of_week = day_of_week',
+    'update exceptions set opens = opens', 'update settings set display_name = ''Hacked''',
+    'delete from bookings', 'delete from weekly_hours', 'delete from exceptions'] loop
+    execute sql;
+    get diagnostics n = row_count;
+    if n > 0 then raise exception 'FAIL other user changed % rows: %', n, sql; end if;
+  end loop;
+  raise notice 'PASS: other user insert, update and delete change nothing';
+end $$;
+
+reset role;
+
 -- Tutor
 set local role authenticated;
 set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-000000000001","role":"authenticated"}';
@@ -129,6 +172,10 @@ begin
   delete from bookings where id = id_;
   if not found then raise exception 'FAIL Tutor cannot delete bookings'; end if;
   raise notice 'PASS: Tutor can read, insert, update and delete bookings';
+
+  if not exists (select 1 from bookings_outside_open_time() where student_name = 'Night Nia') then
+    raise exception 'FAIL Tutor cannot read bookings_outside_open_time()'; end if;
+  raise notice 'PASS: Tutor can read bookings_outside_open_time()';
 
   if not exists (select 1 from weekly_hours) then raise exception 'FAIL Tutor cannot read weekly_hours'; end if;
   insert into weekly_hours (day_of_week, start_time, end_time) values (1, '06:00', '07:00') returning id into id_;
