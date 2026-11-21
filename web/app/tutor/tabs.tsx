@@ -11,7 +11,7 @@ const TABS = [
 export function Tabs() {
   const path = usePathname();
   return (
-    <nav aria-label="Tutor screens" className="flex gap-8">
+    <nav aria-label="Tutor screens" className="flex gap-6 sm:gap-8">
       {TABS.map(({ href, label }) => {
         const current = path.startsWith(href);
         return (
