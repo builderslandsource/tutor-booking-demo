@@ -12,3 +12,15 @@ node_modules/
 
 # Private design mood board (screenshots of third-party templates, never commit)
 design/moodboard/
+
+# Local agent dashboard, generated design image, recordings and screenshots (never commit)
+.agent-team/
+design/empty-state.png
+recordings/
+screenshots/
+*.mp4
+*.mov
+*.webm
+*.mkv
+Screenshot*.png
+Screen Shot*.png
