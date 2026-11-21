@@ -15,7 +15,7 @@ A Student books a free 60-minute Slot with their name and email. Two Students ca
 | Booking page | anyone | See the free Slots for the next 4 weeks, one week at a time, under one clear label naming the Tutor's time zone, and pick one |
 | Booking form | anyone | Enter name and email (both required) for the chosen Slot and confirm |
 | Confirmation | anyone | See the booked date and time (with time zone) and "To cancel, message [Tutor]" |
-| Login | Tutor | Log in with the password |
+| Login | Tutor | Log in with the password, and log out from any Tutor screen |
 | Bookings | Tutor | See upcoming active Bookings by date and cancel any of them; see cancelled and past Bookings in a separate list |
 | Open time | Tutor | Set Weekly Hours, add or remove Exceptions, change Minimum Notice and Booking Horizon; see a warning listing any active Bookings a change affects |
 
