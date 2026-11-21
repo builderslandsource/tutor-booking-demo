@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "booking_demo",
+  "project_id": "e3b356f5-0689-4e7c-8b86-afccda21dcc9"
+}
