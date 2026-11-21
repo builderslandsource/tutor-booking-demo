@@ -13,3 +13,14 @@ Only the Tutor can log in. There is no sign-up page, so the Tutor user is create
 
 1. In `supabase/config.toml`, under `[auth]`, set `enable_signup = false`, then restart (`supabase stop && supabase start`).
 2. Create the Tutor user in the local Studio (http://localhost:54723): Authentication → Users → Add user, with "Auto Confirm User" ticked.
+   Or load the demo data below, which creates the Tutor user for you.
+
+## Local demo data
+
+`supabase/seed.sql` fills the local database with a Tutor login, Weekly Hours, two Exceptions and nine Bookings (six upcoming, one cancelled, two past). Booking dates are worked out from the moment you load it.
+
+- Load it: `supabase db reset` (rebuilds the local database and runs the seed), or, to keep everything else, `PGPASSWORD=postgres psql -h 127.0.0.1 -p 54722 -U postgres -d postgres -1 -f supabase/seed.sql`.
+- Reloading wipes local Bookings, Weekly Hours and Exceptions and puts the demo ones back.
+- Local demo login, **local only, never use on the hosted site**:
+  - Email: `tutor@example.test`
+  - Password: `local-demo-only`
