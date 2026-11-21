@@ -1,4 +1,4 @@
--- T7 privacy checks. Run after migrations 0001-0003:
+-- T7 privacy checks. Run after migrations 0001-0004:
 --   psql -X -v ON_ERROR_STOP=1 -f supabase/tests/privacy.sql
 -- Everything runs in one transaction and is rolled back.
 begin;
@@ -13,6 +13,42 @@ insert into exceptions (date, start_time, end_time, opens) values (current_date 
 insert into bookings (slot_start, student_name, student_email)
   select max(f), 'Secret Sam', 'sam@example.com' from free_slots() f;
 select set_config('test.sam_slot', (select slot_start::text from bookings), true);
+
+-- Privilege checks only: setval is not undone by rollback, so never call it here.
+do $$
+declare q text; r text;
+begin
+  foreach q in array array['bookings_id_seq', 'weekly_hours_id_seq', 'exceptions_id_seq'] loop
+    foreach r in array array['anon', 'authenticated'] loop
+      if has_sequence_privilege(r, q, 'SELECT') or has_sequence_privilege(r, q, 'UPDATE')
+         or has_sequence_privilege(r, q, 'USAGE') then
+        raise exception 'FAIL % can read or set %', r, q; end if;
+    end loop;
+  end loop;
+  raise notice 'PASS: anon and authenticated cannot read or setval the id sequences';
+end $$;
+
+do $$
+begin
+  if has_function_privilege('anon', 'free_slots_at(timestamptz)', 'execute')
+     or has_function_privilege('authenticated', 'free_slots_at(timestamptz)', 'execute') then
+    raise exception 'FAIL anon or authenticated can execute free_slots_at'; end if;
+  raise notice 'PASS: anon and authenticated cannot execute free_slots_at';
+end $$;
+
+-- New objects made by postgres (as migrations are) must not auto-grant to anon.
+create table privacy_probe (id bigint generated always as identity primary key);
+create function privacy_probe_fn() returns int language sql as 'select 1';
+do $$
+begin
+  if has_table_privilege('anon', 'privacy_probe', 'SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER')
+     or has_sequence_privilege('anon', 'privacy_probe_id_seq', 'SELECT, UPDATE, USAGE')
+     or has_function_privilege('anon', 'privacy_probe_fn()', 'execute') then
+    raise exception 'FAIL anon gets default privileges on new objects'; end if;
+  raise notice 'PASS: anon gets no privilege on new tables, sequences or functions';
+end $$;
+drop function privacy_probe_fn();
+drop table privacy_probe;
 
 -- Anonymous visitor
 set local role anon;
@@ -57,14 +93,6 @@ begin
     raise exception 'FAIL free_slots() does not return a single timestamptz column';
   end if;
   raise notice 'PASS: anon free_slots() returns only Slot start times (setof timestamptz)';
-end $$;
-
-do $$
-begin
-  perform free_slots_at(now() - interval '1 day');
-  raise exception 'FAIL anon can execute free_slots_at';
-exception when insufficient_privilege then
-  raise notice 'PASS: anon cannot execute free_slots_at';
 end $$;
 
 do $$
