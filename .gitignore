@@ -9,3 +9,6 @@ node_modules/
 *.db
 .beads-credential-key
 .beads/proxieddb/
+
+# Private design mood board (screenshots of third-party templates, never commit)
+design/moodboard/
