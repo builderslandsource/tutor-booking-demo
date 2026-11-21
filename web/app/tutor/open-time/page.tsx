@@ -29,9 +29,11 @@ function intervalHours(v: string) {
   return days * 24 + hours;
 }
 
-const input = "field min-h-11";
-const button = "btn";
+const input = "field min-h-11 px-2 tabular-nums";
+const button = "btn px-4";
 const remove = "text-action px-2";
+// One set of hours (or one Exception) per line; wraps only when the screen is too narrow.
+const line = "flex flex-wrap items-center gap-x-2 gap-y-1 py-1";
 const sectionTitle = "section-title";
 
 // "2026-11-27" -> "Fri 27 Nov", so a saved Exception reads like the rest of the app.
@@ -78,7 +80,7 @@ async function OpenTime({ searchParams }: { searchParams: Promise<{ error?: stri
   const affected = outside.data as Booking[];
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-10">
       <header>
         <h1 className="border-b border-ink pb-3 font-serif text-3xl lg:text-4xl">Open time</h1>
         <p className="mt-3 text-ink-soft">All times in {zone} time</p>
@@ -104,100 +106,110 @@ async function OpenTime({ searchParams }: { searchParams: Promise<{ error?: stri
         </section>
       )}
 
-      <div className="grid items-start gap-12 lg:grid-cols-2 lg:gap-16">
-        <section>
-          <h2 className={sectionTitle}>Weekly Hours <span className="zone">({zone} time)</span></h2>
-          {WEEK_ORDER.map((day) => (
-            <div key={day} className="space-y-2 border-b border-rule py-4">
-              <h3 className="caps">{DAYS[day]}</h3>
-              {hours
-                .filter((w) => w.day_of_week === day)
-                .map((w) => (
-                  <form key={w.id} action={saveWeekly} className="flex flex-wrap items-center gap-2">
+      <section>
+        <h2 className={sectionTitle}>Weekly Hours</h2>
+        {/* Days side by side where they fit; each set of hours is one line. */}
+        <div className="grid gap-x-10 md:grid-cols-[repeat(auto-fill,minmax(min(100%,23rem),1fr))]">
+          {WEEK_ORDER.map((day) => {
+            const sets = hours.filter((w) => w.day_of_week === day);
+            return (
+              <div key={day} className="border-b border-rule py-3">
+                <h3 className="caps flex min-h-8 items-baseline justify-between gap-4">
+                  {DAYS[day]}
+                  {sets.length === 0 && <span className="font-sans text-sm normal-case tracking-normal text-ink-soft">Closed</span>}
+                </h3>
+                {sets.map((w) => (
+                  <form key={w.id} action={saveWeekly} className={line}>
                     <input type="hidden" name="id" value={w.id} />
                     <Times start={hhmm(w.start_time)} end={hhmm(w.end_time)} />
-                    <button className={button}>Save</button>
-                    <button formAction={removeWeekly} formNoValidate className={remove}>
-                      Remove
-                    </button>
+                    <span className="flex items-center gap-1">
+                      <button className={button}>Save</button>
+                      <button formAction={removeWeekly} formNoValidate className={remove}>
+                        Remove
+                      </button>
+                    </span>
                   </form>
                 ))}
-              <details className="group">
-                <summary className="text-action list-none [&::-webkit-details-marker]:hidden">
-                  <span className="group-open:hidden">Add hours</span>
-                  <span className="hidden group-open:inline">Close</span>
-                </summary>
-                <form action={addWeekly} className="flex flex-wrap items-center gap-2 pt-2">
-                  <input type="hidden" name="day" value={day} />
-                  <Times />
-                  <button className={button}>Add</button>
-                </form>
-              </details>
-            </div>
-          ))}
-        </section>
-
-        <div>
-          <section>
-            <h2 className={sectionTitle}>Exceptions <span className="zone">({zone} time)</span></h2>
-            {exc.map((e) => (
-              <form key={e.id} action={saveException} className="flex flex-wrap items-center gap-2 border-b border-rule py-4">
-                <h3 className="caps w-full">{dayLabel(e.date)}</h3>
-                <input type="hidden" name="id" value={e.id} />
-                <input type="date" name="date" defaultValue={e.date} required aria-label="Date" className={input} />
-                <Kind opens={e.opens} />
-                <Times start={hhmm(e.start_time)} end={hhmm(e.end_time)} />
-                <button className={button}>Save</button>
-                <button formAction={removeException} formNoValidate className={remove}>
-                  Remove
-                </button>
-              </form>
-            ))}
-            <form action={addException} className="flex flex-wrap items-center gap-2 py-4">
-              <input type="date" name="date" required aria-label="Date" className={input} />
-              <Kind />
-              <Times />
-              <button className={button}>Add Exception</button>
-            </form>
-          </section>
-        <section className="mt-12 max-w-prose">
-          <h2 className={sectionTitle}>Settings</h2>
-          <form action={saveSettings} className="space-y-1 py-2">
-            <label className="flex min-h-14 items-center gap-3 border-b border-rule">
-              <span className="w-40">Minimum Notice</span>
-              <input
-                type="number"
-                name="notice"
-                min={1}
-                max={336}
-                step={1}
-                required
-                defaultValue={intervalHours(settings.data.minimum_notice)}
-                className={`${input} w-24 tabular-nums`}
-              />
-              hours
-            </label>
-            <label className="flex min-h-14 items-center gap-3 border-b border-rule">
-              <span className="w-40">Booking Horizon</span>
-              <input
-                type="number"
-                name="horizon"
-                min={1}
-                max={52}
-                step={1}
-                required
-                defaultValue={Math.round(intervalHours(settings.data.booking_horizon) / 168)}
-                className={`${input} w-24 tabular-nums`}
-              />
-              weeks
-            </label>
-            <div className="pt-4">
-              <button className={button}>Save settings</button>
-            </div>
-          </form>
-        </section>
+                <details className="group">
+                  <summary className="text-action list-none [&::-webkit-details-marker]:hidden">
+                    <span className="group-open:hidden">Add hours</span>
+                    <span className="hidden group-open:inline">Close</span>
+                  </summary>
+                  <form action={addWeekly} className={`${line} pb-1`}>
+                    <input type="hidden" name="day" value={day} />
+                    <Times />
+                    <button className={button}>Add</button>
+                  </form>
+                </details>
+              </div>
+            );
+          })}
         </div>
-      </div>
+      </section>
+
+      <section>
+        <h2 className={sectionTitle}>Exceptions</h2>
+        {exc.map((e) => (
+          <form key={e.id} action={saveException} className={`${line} border-b border-rule py-3`}>
+            <h3 className="caps w-full lg:w-28 lg:shrink-0">{dayLabel(e.date)}</h3>
+            <input type="hidden" name="id" value={e.id} />
+            <input type="date" name="date" defaultValue={e.date} required aria-label="Date" className={input} />
+            <Kind opens={e.opens} />
+            <Times start={hhmm(e.start_time)} end={hhmm(e.end_time)} />
+            <span className="flex items-center gap-1">
+              <button className={button}>Save</button>
+              <button formAction={removeException} formNoValidate className={remove}>
+                Remove
+              </button>
+            </span>
+          </form>
+        ))}
+        {exc.length === 0 && <p className="border-b border-rule py-3 text-ink-soft">No Exceptions.</p>}
+        <form action={addException} className={`${line} py-3`}>
+          <span className="caps w-full lg:w-28 lg:shrink-0">New</span>
+          <input type="date" name="date" required aria-label="Date" className={input} />
+          <Kind />
+          <Times />
+          <button className={button}>Add Exception</button>
+        </form>
+      </section>
+
+      <section className="max-w-prose">
+        <h2 className={sectionTitle}>Settings</h2>
+        <form action={saveSettings} className="py-1">
+          <label className="flex min-h-14 items-center gap-3 border-b border-rule">
+            <span className="w-40">Minimum Notice</span>
+            <input
+              type="number"
+              name="notice"
+              min={1}
+              max={336}
+              step={1}
+              required
+              defaultValue={intervalHours(settings.data.minimum_notice)}
+              className={`${input} w-24 tabular-nums`}
+            />
+            hours
+          </label>
+          <label className="flex min-h-14 items-center gap-3 border-b border-rule">
+            <span className="w-40">Booking Horizon</span>
+            <input
+              type="number"
+              name="horizon"
+              min={1}
+              max={52}
+              step={1}
+              required
+              defaultValue={Math.round(intervalHours(settings.data.booking_horizon) / 168)}
+              className={`${input} w-24 tabular-nums`}
+            />
+            weeks
+          </label>
+          <div className="pt-4">
+            <button className={button}>Save settings</button>
+          </div>
+        </form>
+      </section>
     </div>
   );
 }

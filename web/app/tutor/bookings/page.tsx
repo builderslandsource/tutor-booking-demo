@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { ZonedTime } from "@/components/zoned-time";
+import { zoneCity } from "@/lib/time";
 import { cancelBooking } from "./actions";
 
 type Booking = { id: number; slot_start: string; student_name: string; student_email: string; status: string };
@@ -54,6 +55,8 @@ async function Bookings() {
 
   return (
     <>
+      {/* The time zone, said once for the screen, as on the booking page. Each row still carries its own label. */}
+      <p className="mb-2 mt-3 text-ink-soft">All times in {zoneCity(tz)} time</p>
       {soon.length === 0 ? (
         <p className="py-8 text-lg">No Bookings in the next two weeks.</p>
       ) : (
