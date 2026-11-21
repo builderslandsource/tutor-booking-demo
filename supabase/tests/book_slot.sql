@@ -52,19 +52,35 @@ begin
   if pg_temp.book(now() + interval '60 days', 'Ed', 'ed@example.com') <> 'not_free' then raise exception 'FAIL beyond horizon'; end if;
   if pg_temp.book(date_trunc('hour', s) + interval '7 days 3 minutes', 'Ed', 'ed@example.com') <> 'not_free' then
     raise exception 'FAIL off-grid time'; end if;
+  if pg_temp.book(null, 'Ed', 'ed@example.com') <> 'not_free' then raise exception 'FAIL null time'; end if;
+  insert into bookings (slot_start, student_name, student_email) values (date_trunc('hour', now()) + interval '2 hours', 'Fy', 'fy@example.com');
+  if pg_temp.book(date_trunc('hour', now()) + interval '2 hours', 'Ed', 'ed@example.com') <> 'not_free' then
+    raise exception 'FAIL booked time inside notice reveals taken'; end if;
+  insert into bookings (slot_start, student_name, student_email) values (date_trunc('hour', now()) - interval '1 day', 'Gu', 'gu@example.com');
+  if pg_temp.book(date_trunc('hour', now()) - interval '1 day', 'Ed', 'ed@example.com') <> 'not_free' then
+    raise exception 'FAIL booked past time reveals taken'; end if;
+  delete from bookings where student_name in ('Fy', 'Gu');
   if (select count(*) from bookings) <> 1 then raise exception 'FAIL rejected Slot stored'; end if;
-  raise notice 'PASS: a Slot that is not currently free is rejected (not_free)';
+  raise notice 'PASS: a Slot that is not currently free is rejected (not_free), incl. null time and booked past/inside-notice times';
 
   s := (select min(f) from free_slots() f);
   if pg_temp.book(s, '  ', 'ed@example.com') <> 'invalid' then raise exception 'FAIL empty name'; end if;
+  if pg_temp.book(s, E'\t\n', 'ed@example.com') <> 'invalid' then raise exception 'FAIL tab/newline name'; end if;
+  if pg_temp.book(s, chr(160) || chr(160), 'ed@example.com') <> 'invalid' then raise exception 'FAIL no-break-space name'; end if;
   if pg_temp.book(s, 'Ed', '') <> 'invalid' then raise exception 'FAIL empty email'; end if;
   if pg_temp.book(s, 'Ed', 'ed@example') <> 'invalid' then raise exception 'FAIL bad email'; end if;
   if pg_temp.book(s, 'Ed', 'ed @example.com') <> 'invalid' then raise exception 'FAIL bad email with space'; end if;
-  raise notice 'PASS: empty name, empty email and badly formed email are rejected (invalid)';
+  raise notice 'PASS: empty or whitespace-only (tab, newline, no-break space) name, empty email and badly formed email are rejected (invalid)';
 
   if pg_temp.book(s, 'Ed', 'ed@example.com', 'http://spam') <> 'invalid' then raise exception 'FAIL bot field'; end if;
   if (select count(*) from bookings) <> 1 then raise exception 'FAIL invalid booking stored'; end if;
   raise notice 'PASS: a filled-in hidden bot field is rejected (invalid)';
+
+  if pg_temp.book(s, 'Ed', E' ed@example.com\t\n') <> 'booked'
+     or (select student_email from bookings where student_name = 'Ed') <> 'ed@example.com' then
+    raise exception 'FAIL email not trimmed of whitespace'; end if;
+  delete from bookings where student_name = 'Ed';
+  raise notice 'PASS: email is stored trimmed of tabs and newlines';
 end $$;
 
 do $$ begin

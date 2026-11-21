@@ -17,8 +17,9 @@ language plpgsql volatile security definer
 set search_path = pg_catalog, public
 as $$
 declare
-  v_name text := btrim(coalesce(p_name, ''));
-  v_email text := btrim(coalesce(p_email, ''));
+  -- trims all whitespace, including tabs, newlines and no-break spaces
+  v_name text := regexp_replace(coalesce(p_name, ''), '^[[:space:]\u00a0]+|[[:space:]\u00a0]+$', '', 'g');
+  v_email text := regexp_replace(coalesce(p_email, ''), '^[[:space:]\u00a0]+|[[:space:]\u00a0]+$', '', 'g');
 begin
   if coalesce(p_website, '') <> ''
      or v_name = '' or length(v_name) > 200
@@ -26,9 +27,16 @@ begin
     return 'invalid';
   end if;
 
-  if p_slot_start is null or p_slot_start not in (select free_slots()) then
-    if exists (select 1 from bookings
-               where status = 'active' and slot_range(slot_start) && slot_range(p_slot_start)) then
+  if p_slot_start is null then
+    return 'not_free';
+  end if;
+
+  if p_slot_start not in (select free_slots()) then
+    -- 'taken' only inside the bookable window, so visitors can't probe past or closed times for Bookings
+    if exists (select 1 from settings s
+               where p_slot_start between now() + s.minimum_notice and now() + s.booking_horizon)
+       and exists (select 1 from bookings
+                   where status = 'active' and slot_range(slot_start) && slot_range(p_slot_start)) then
       return 'taken';
     end if;
     return 'not_free';
