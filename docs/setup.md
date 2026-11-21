@@ -11,4 +11,4 @@ Only the Tutor can log in. There is no sign-up page, so the Tutor user is create
 ## Local Supabase
 
 1. In `supabase/config.toml`, under `[auth]`, set `enable_signup = false`, then restart (`supabase stop && supabase start`).
-2. Create the Tutor user in the local Studio (http://localhost:54323): Authentication → Users → Add user, with "Auto Confirm User" ticked.
+2. Create the Tutor user in the local Studio (http://localhost:54723): Authentication → Users → Add user, with "Auto Confirm User" ticked.
