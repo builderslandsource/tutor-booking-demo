@@ -19,8 +19,9 @@ Only the Tutor can log in. There is no sign-up page, so the Tutor user is create
 
 `supabase/seed.sql` fills the local database with a Tutor login, Weekly Hours, two Exceptions and nine Bookings (six upcoming, one cancelled, two past). Booking dates are worked out from the moment you load it.
 
-- Load it: `supabase db reset` (rebuilds the local database and runs the seed), or, to keep everything else, `PGPASSWORD=postgres psql -h 127.0.0.1 -p 54722 -U postgres -d postgres -1 -f supabase/seed.sql`.
+- Choose a local-only Tutor password and set it before loading: copy `.env.example` to `.env`, fill in `SEED_TUTOR_PASSWORD` (letters and digits, no spaces), then run `set -a; . ./.env; set +a` in your terminal. `.env` is git-ignored.
+- Load it: `PGOPTIONS="-c seed.tutor_password=$SEED_TUTOR_PASSWORD" supabase db reset` (rebuilds the local database and runs the seed), or, to keep everything else, `PGOPTIONS="-c seed.tutor_password=$SEED_TUTOR_PASSWORD" PGPASSWORD=postgres psql -h 127.0.0.1 -p 54722 -U postgres -d postgres -1 -f supabase/seed.sql`. Without the password the seed stops with an error.
 - Reloading wipes local Bookings, Weekly Hours and Exceptions and puts the demo ones back.
 - Local demo login, **local only, never use on the hosted site**:
   - Email: `tutor@example.test`
-  - Password: `local-demo-only`
+  - Password: the `SEED_TUTOR_PASSWORD` you chose.

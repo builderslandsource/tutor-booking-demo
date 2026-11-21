@@ -1,14 +1,18 @@
 -- Demo data for the LOCAL database only. Runs on `supabase db reset`.
--- Never run this against the hosted database: the Tutor password below is a throwaway demo one.
+-- Never run this against the hosted database.
 -- Reloading wipes local Bookings, Weekly Hours and Exceptions and puts the demo ones back.
 
--- Tutor login (one user only). Email and password are in docs/setup.md.
+-- Tutor login (one user only). The password comes from SEED_TUTOR_PASSWORD, passed in as
+-- seed.tutor_password by the load command in docs/setup.md.
 do $$
 declare
   v_email text := 'tutor@example.test';
-  v_password text := 'local-demo-only';
+  v_password text := nullif(current_setting('seed.tutor_password', true), '');
   v_id uuid;
 begin
+  if v_password is null then
+    raise exception 'SEED_TUTOR_PASSWORD is not set. See docs/setup.md, "Local demo data".';
+  end if;
   select id into v_id from auth.users where email = v_email;
   if v_id is not null then
     update auth.users set encrypted_password = extensions.crypt(v_password, extensions.gen_salt('bf')),
