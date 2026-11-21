@@ -2,6 +2,7 @@
 
 import { useActionState, useState, type CSSProperties } from "react";
 import { book, type BookState } from "@/app/book/actions";
+import { ZonedTime } from "@/components/zoned-time";
 import { formatSlot } from "@/lib/time";
 
 type Props = { slots: string[]; tutor: string; timeZone: string };
@@ -30,24 +31,28 @@ export function BookingSheet({ slots, tutor, timeZone }: Props) {
 
   if (state.status === "booked" && state.slot) {
     return (
-      <section className="max-w-2xl py-8 lg:py-2" aria-live="polite">
-        <p className="text-lg">You&apos;re booked for</p>
-        <p className="mt-3 text-3xl font-semibold tabular-nums text-pen lg:text-4xl">
-          {formatSlot(state.slot, timeZone)}
+      <section className="mx-auto max-w-3xl py-8 sm:py-6 lg:py-12" aria-live="polite">
+        <p className="text-lg text-ink-soft">You&apos;re booked for</p>
+        <p className="mt-3 text-balance text-3xl font-semibold leading-tight tracking-[-0.02em] tabular-nums text-pen sm:text-4xl lg:text-5xl">
+          <ZonedTime start={state.slot} timeZone={timeZone} />
         </p>
-        <span aria-hidden="true" className="mt-3 block h-0.5 origin-left bg-pen motion-safe:animate-ink-in" />
-        <dl className="mt-6 grid grid-cols-[auto_1fr] gap-x-6 text-lg">
-          <dt className="border-b border-rule py-3 text-ink-soft">Lesson</dt>
-          <dd className="border-b border-rule py-3">60 minutes with {tutor}</dd>
+        <span aria-hidden="true" className="mt-5 block h-0.5 origin-left bg-pen motion-safe:animate-ink-in" />
+        <dl className="mt-10 grid gap-x-10 sm:grid-cols-2">
+          <div className="border-b border-rule py-4">
+            <dt className="text-sm text-ink-soft">Lesson</dt>
+            <dd className="mt-1 text-lg">60 minutes with {tutor}</dd>
+          </div>
           {state.name && (
-            <>
-              <dt className="border-b border-rule py-3 text-ink-soft">Name</dt>
-              <dd className="break-words border-b border-rule py-3">{state.name}</dd>
-            </>
+            <div className="border-b border-rule py-4">
+              <dt className="text-sm text-ink-soft">Name</dt>
+              <dd className="mt-1 break-words text-lg">{state.name}</dd>
+            </div>
           )}
         </dl>
-        <p className="mt-6">No email is sent, so take a screenshot of this to keep it.</p>
-        <p className="mt-2 text-ink-soft">To cancel, message {tutor}</p>
+        <div className="mt-8 grid gap-x-10 gap-y-2 sm:grid-cols-2">
+          <p className="font-medium">No email is sent, so take a screenshot of this to keep it.</p>
+          <p className="text-ink-soft">To cancel, message {tutor}</p>
+        </div>
       </section>
     );
   }
@@ -75,14 +80,14 @@ export function BookingSheet({ slots, tutor, timeZone }: Props) {
   const hasSunday = [...weeks.values()].some((days) => [...days.keys()].some((d) => weekday(d) === 7));
 
   return (
-    <section className="pt-2 lg:pt-0">
+    <section>
       {notice && (
         <p role="alert" className="ink-note my-4">
           {notice}
         </p>
       )}
       {state.slots.length === 0 ? (
-        <p className="max-w-[34ch] py-16 text-xl leading-relaxed lg:py-4">
+        <p className="max-w-[34ch] py-16 text-xl leading-relaxed lg:py-10">
           No open times right now, please message {tutor}
         </p>
       ) : (
@@ -106,7 +111,7 @@ export function BookingSheet({ slots, tutor, timeZone }: Props) {
                             <span className="text-[22px] font-semibold tabular-nums text-pen decoration-2 underline-offset-4 group-hover:underline">
                               {clock}
                             </span>
-                            <span className="text-sm text-ink-soft">{zone}</span>
+                            <span className="zone">{zone}</span>
                           </button>
                           {selected === iso && (
                             <form action={action} className="grid gap-4 overflow-hidden pb-5 pt-1 motion-safe:animate-line-open">

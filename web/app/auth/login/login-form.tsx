@@ -20,7 +20,7 @@ export function LoginForm() {
             className="field font-normal" />
         </label>
         {error && <p role="alert" className="ink-note text-sm">{error}</p>}
-        <button type="submit" className="btn w-full" disabled={pending} aria-busy={pending}>
+        <button type="submit" className="btn-ink mt-2 w-full" disabled={pending} aria-busy={pending}>
           {pending ? "Logging in…" : "Log in"}
         </button>
       </form>

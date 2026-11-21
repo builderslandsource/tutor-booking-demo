@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* The Door Sheet: warm paper, dark ink, one ballpoint blue. See DESIGN-BRIEF.md. */
+/* The Door Sheet: a raised paper sheet on a warm desk, dark ink, one ballpoint blue. See DESIGN-BRIEF.md. */
 @layer base {
   :root {
     --background: 37 50% 96.5%; /* paper #FAF7F2 */
@@ -32,8 +32,11 @@
   * {
     @apply border-border;
   }
+  html {
+    scrollbar-color: #c9bfae transparent;
+  }
   body {
-    @apply bg-paper text-ink;
+    @apply bg-desk text-ink;
   }
   ::selection {
     background-color: #d9d2c5; /* ruled line */
@@ -59,6 +62,20 @@
   .section-title {
     @apply border-b border-ink pb-2 text-lg font-semibold;
   }
+  /* The raised paper sheet. Phone: full width, rising from below. Wider: a floating sheet. */
+  .sheet {
+    @apply rounded-t-[1.25rem] bg-paper shadow-sheet sm:rounded-2xl;
+  }
+  /* The time zone label on every time: always shown, but quiet. Scales with the time it follows. */
+  /* inline-block so a crossed-out row strikes the time, not this small label. */
+  .zone {
+    display: inline-block;
+    font-size: max(0.75rem, 0.55em);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    color: #5b6170; /* soft ink, 5.9:1 on paper */
+  }
   .field {
     @apply min-h-12 rounded-md border border-field bg-paper px-3 text-base text-ink;
   }
@@ -69,6 +86,10 @@
   /* The one solid button: Book. */
   .btn-book {
     @apply inline-flex min-h-12 items-center justify-center rounded-full bg-pen px-6 py-3 text-center font-semibold leading-snug text-white hover:bg-pen/90 disabled:opacity-80;
+  }
+  /* Solid ink button: Log in, the one action on its screen (blue stays for Book). */
+  .btn-ink {
+    @apply inline-flex min-h-12 items-center justify-center rounded-full bg-ink px-6 font-semibold text-paper hover:bg-ink/90 disabled:opacity-80;
   }
   /* Plain ink text action (Cancel, Remove, Later). */
   .text-action {

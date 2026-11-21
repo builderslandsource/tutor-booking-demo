@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
-import { formatSlot, zoneCity } from "@/lib/time";
+import { ZonedTime } from "@/components/zoned-time";
+import { zoneCity } from "@/lib/time";
 import {
   addException,
   addWeekly,
@@ -77,7 +78,7 @@ async function OpenTime({ searchParams }: { searchParams: Promise<{ error?: stri
   const affected = outside.data as Booking[];
 
   return (
-    <div className="space-y-12 pt-8">
+    <div className="space-y-12">
       <header>
         <h1 className="border-b border-ink pb-3 font-serif text-3xl lg:text-4xl">Open time</h1>
         <p className="mt-3 text-ink-soft">All times in {zone} time</p>
@@ -95,7 +96,7 @@ async function OpenTime({ searchParams }: { searchParams: Promise<{ error?: stri
           <ul className="tabular-nums">
             {affected.map((b) => (
               <li key={b.id}>
-                {formatSlot(b.slot_start, tz)}, {b.student_name}
+                <ZonedTime start={b.slot_start} timeZone={tz} />, {b.student_name}
               </li>
             ))}
           </ul>
@@ -105,7 +106,7 @@ async function OpenTime({ searchParams }: { searchParams: Promise<{ error?: stri
 
       <div className="grid items-start gap-12 lg:grid-cols-2 lg:gap-16">
         <section>
-          <h2 className={sectionTitle}>Weekly Hours ({zone} time)</h2>
+          <h2 className={sectionTitle}>Weekly Hours <span className="zone">({zone} time)</span></h2>
           {WEEK_ORDER.map((day) => (
             <div key={day} className="space-y-2 border-b border-rule py-4">
               <h3 className="caps">{DAYS[day]}</h3>
@@ -138,7 +139,7 @@ async function OpenTime({ searchParams }: { searchParams: Promise<{ error?: stri
 
         <div>
           <section>
-            <h2 className={sectionTitle}>Exceptions ({zone} time)</h2>
+            <h2 className={sectionTitle}>Exceptions <span className="zone">({zone} time)</span></h2>
             {exc.map((e) => (
               <form key={e.id} action={saveException} className="flex flex-wrap items-center gap-2 border-b border-rule py-4">
                 <h3 className="caps w-full">{dayLabel(e.date)}</h3>
@@ -206,7 +207,7 @@ export const metadata: Metadata = { title: "Open time" };
 export default function OpenTimePage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   return (
     <main>
-      <Suspense fallback={<p className="pt-8 text-ink-soft">Loading open time…</p>}>
+      <Suspense fallback={<p className="text-ink-soft">Loading open time…</p>}>
         <OpenTime searchParams={searchParams} />
       </Suspense>
     </main>

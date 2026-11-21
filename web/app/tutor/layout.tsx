@@ -9,9 +9,11 @@ async function TutorOnly({ children }: { children: React.ReactNode }) {
   const { data } = await supabase.auth.getClaims();
   if (!data?.claims) redirect("/auth/login");
   return (
-    <div className="mx-auto min-h-screen max-w-6xl px-6 py-6 lg:px-12 lg:py-10">
-      <Tabs />
-      {children}
+    <div className="mx-auto min-h-screen max-w-6xl pt-4 sm:px-6 sm:pb-10 lg:px-12 lg:pt-8">
+      <div className="px-6 sm:px-0">
+        <Tabs />
+      </div>
+      <div className="sheet mt-3 min-h-[80svh] px-6 pb-12 pt-8 sm:min-h-0 sm:p-10 lg:p-12">{children}</div>
     </div>
   );
 }

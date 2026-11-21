@@ -1,6 +1,6 @@
 # Design Brief: Booking Page and Tutor Screens
 
-Agreed 2026-11-20 (Impeccable `shape`). Product facts: PRODUCT.md. Rules: SPEC.md. Words: GLOSSARY.md.
+Agreed 2026-11-20 (Impeccable `shape`). Updated 2026-11-20: a raised sheet on a tinted desk, quieter zone labels, solid Log in. Product facts: PRODUCT.md. Rules: SPEC.md. Words: GLOSSARY.md.
 
 ## 1. Who it's for
 - **Students**: 15 to 25, booking for themselves, almost always on a phone, from a link the Tutor sends. One short visit, no login, no idea how the system works.
@@ -11,15 +11,16 @@ Agreed 2026-11-20 (Impeccable `shape`). Product facts: PRODUCT.md. Rules: SPEC.m
 - **Student**: find a free time, tap it, enter name and email, and see the confirmation, all on one sheet in under a minute. The confirmation is the Student's only record (no emails).
 - **Tutor**: see at a glance who is coming in the next two weeks, cancel a Booking in two taps, and change open time knowing exactly which Bookings it affects.
 
-## 3. The look: "The Door Sheet", on warm paper
+## 3. The look: "The Door Sheet", a paper sheet on a warm desk
 - **Idea**: an office-hours sign-up sheet. Each free Slot is a ruled line, and booking means writing yourself onto it. Calm, roomy and quietly warm: a good paper notebook, not a booking app.
-- **Style**: calm minimal. Lots of space, thin ruled lines, no cards, shadows, tape, photos, illustrations or decoration.
-- **Colour**: warm off-white paper `#FAF7F2`, dark ink `#1F2430`, soft ink `#5B6170` for small notes, and **one accent, ballpoint blue `#1D4ED8`**. Blue is used only for Slot times you can tap, the selected line (tinted `#EEF2FD`), the Book button, and your inked-in line on the confirmation. Ruled lines are `#D9D2C5`; field borders are `#8A8478`. Nothing else has colour. Errors are in dark ink with a clear label, not red.
+- **Style**: calm minimal with quiet depth. The page background is a tinted desk; the working content sits on **one soft raised paper sheet** per screen (one gentle warm shadow, rounded 16px corners, no border). On a phone the sheet runs full width and rises from below the Tutor's name with rounded top corners; wider screens show a floating sheet. Inside the sheet: lots of space and thin ruled lines. Still no cards inside the sheet, no nested sheets, tape, photos, illustrations or decoration.
+- **Colour**: warm desk `#EDE6DA` (page background only), warm off-white paper `#FAF7F2` (the sheet), dark ink `#1F2430`, soft ink `#5B6170` for small notes, and **one accent, ballpoint blue `#1D4ED8`**. Blue is used only for Slot times you can tap, the selected line (tinted `#EEF2FD`), the Book button, and your inked-in line on the confirmation. Ruled lines are `#D9D2C5`; field borders are `#8A8478`. Nothing else has colour. Errors are in dark ink with a clear label, not red.
 - **Type**: two fonts. **Newsreader** (serif) only for the Tutor's name, day headings and page titles. **Public Sans** for everything else. No handwriting fonts; the "ballpoint" comes from the colour only.
 - **Times are the biggest text on the page**: Public Sans semibold, about 22px on phone, all digits the same width. Every Slot row is the same height. The time leads each row; the day sits above in a small, spaced-out capital-letter heading.
+- **Time zone labels are always there, but quiet**: where the zone is repeated next to a time (Slot rows, Bookings rows, the confirmation, section titles) it is set smaller (about half the time's size, never under 12px), regular weight, soft ink. It is never removed or hidden. The single "All times in [zone] time" line under the Tutor's name stays at normal size.
 - **Spacing**: generous. Slot rows at least 56px tall, 24px side margins on phone, clear space between weeks.
 - **Past and cancelled items are crossed out in dark ink**, never greyed out and never red.
-- **Buttons**: the Book button is solid blue with white text and fully rounded ends. Other buttons are plain ink outlines. Cancel is plain ink text.
+- **Buttons**: the Book button is solid blue with white text and fully rounded ends. Log in, the only action on its screen, is solid dark ink with paper-coloured text. Other buttons are plain ink outlines. Cancel is plain ink text.
 
 ## 4. Scope and limits
 - **In scope**: the six screens in SPEC.md: Booking page, Booking form, Confirmation, Login, Bookings, Open time. On the Student side, the form and confirmation happen on the booking page sheet.
@@ -36,9 +37,9 @@ Agreed 2026-11-20 (Impeccable `shape`). Product facts: PRODUCT.md. Rules: SPEC.m
 - **Login**: one password field. After 5 wrong tries, a plain lockout message saying when to try again.
 
 ## 6. Layout and interaction
-- **Phone first**: one column, 24px side margins. The top of the sheet shows the Tutor's display name and "All times in [zone] time". Free Slots start right below.
+- **Phone first**: one column, 24px side margins. The Tutor's display name and "All times in [zone] time" sit on the desk at the top; the sheet with the free Slots starts right below.
 - **Booking a Slot**: tapping a line opens Name, Email and Book right under it on the sheet, and on success that line becomes the blue confirmation. The only motion is the line opening and the ink filling in. With reduced motion on, both are instant.
-- **Laptop: full and designed, not a thin strip.** The page uses the width with the same paper, ink and lines, no new content. Booking page: two columns. Left: the Tutor's name in large Newsreader, and "All times in [zone] time", staying in view while you scroll. Right: the Slot list, with each week's days side by side where they fit. Tutor screens: Bookings rows spread into one line each (date and time, name, email, Cancel in aligned columns); Open time shows Weekly Hours and Exceptions side by side. Text lines stay a comfortable reading width; the layout fills the screen, the sentences don't. The Tutor screens switch between Bookings and Open time with two plain tabs at the top.
+- **Laptop: full and designed, not a thin strip.** The page uses the width with the same paper, ink and lines, no new content. Booking page: two columns. Left, on the desk: the Tutor's name in large Newsreader, and "All times in [zone] time", staying in view while you scroll. Right: the raised sheet holding the Slot list, with each week's days side by side where they fit. The confirmation fills that same sheet: the time large in blue with the ink line, then Lesson and Name side by side, then the screenshot and cancel notes. Tutor screens: Bookings rows spread into one line each (date and time, name, email, Cancel in aligned columns); Open time shows Weekly Hours and Exceptions side by side. Text lines stay a comfortable reading width; the layout fills the screen, the sentences don't. The Tutor screens switch between Bookings and Open time with two plain tabs on the desk above the sheet. Login: the Tutor's name on the desk, centred above a narrow raised sheet holding the form.
 - **Controls**: standard buttons, inputs, tabs and time pickers. Tap targets at least 44px. Every text colour meets WCAG AA contrast on the paper (blue 6.3:1, white on blue 6.7:1).
 
 ## 7. Constraints and open decisions

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
-import { formatSlot } from "@/lib/time";
+import { ZonedTime } from "@/components/zoned-time";
 import { cancelBooking } from "./actions";
 
 type Booking = { id: number; slot_start: string; student_name: string; student_email: string; status: string };
@@ -10,7 +10,9 @@ function Row({ b, timeZone, done }: { b: Booking; timeZone: string; done?: boole
   return (
     <li className="grid gap-x-8 border-b border-rule py-3 lg:grid-cols-[21rem_minmax(0,1fr)_minmax(0,1.3fr)_13rem] lg:items-center">
       <div className={`contents ${done ? "[&>*]:line-through [&>*]:decoration-ink" : ""}`}>
-        <p className="text-lg font-semibold tabular-nums lg:whitespace-nowrap">{formatSlot(b.slot_start, timeZone)}</p>
+        <p className="text-lg font-semibold tabular-nums lg:whitespace-nowrap">
+          <ZonedTime start={b.slot_start} timeZone={timeZone} />
+        </p>
         <p className="break-words">{b.student_name}</p>
         <p className="break-words text-ink-soft">{b.student_email}</p>
       </div>
@@ -77,7 +79,7 @@ export const metadata: Metadata = { title: "Bookings" };
 
 export default function BookingsPage() {
   return (
-    <main className="pt-8">
+    <main>
       <h1 className="border-b border-ink pb-3 font-serif text-3xl lg:text-4xl">Bookings</h1>
       <Suspense fallback={<p className="py-8 text-ink-soft">Loading Bookings…</p>}>
         <Bookings />

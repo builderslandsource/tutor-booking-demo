@@ -11,7 +11,7 @@ const TABS = [
 export function Tabs() {
   const path = usePathname();
   return (
-    <nav aria-label="Tutor screens" className="flex gap-8 border-b border-rule">
+    <nav aria-label="Tutor screens" className="flex gap-8">
       {TABS.map(({ href, label }) => {
         const current = path.startsWith(href);
         return (
@@ -19,7 +19,7 @@ export function Tabs() {
             key={href}
             href={href}
             aria-current={current ? "page" : undefined}
-            className={`-mb-px inline-flex min-h-11 items-center border-b-2 font-medium ${
+            className={`inline-flex min-h-11 items-center border-b-2 font-medium ${
               current ? "border-ink text-ink" : "border-transparent text-ink-soft hover:text-ink"
             }`}
           >

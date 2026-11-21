@@ -18,6 +18,7 @@ export default {
       colors: {
         // The Door Sheet palette (DESIGN-BRIEF.md section 3).
         paper: "#FAF7F2",
+        desk: "#EDE6DA", // the tinted surface the sheet rests on
         ink: { DEFAULT: "#1F2430", soft: "#5B6170" },
         pen: { DEFAULT: "#1D4ED8", tint: "#EEF2FD" },
         rule: "#D9D2C5",
@@ -55,6 +56,11 @@ export default {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
+      },
+      boxShadow: {
+        // One soft, warm lift for the sheet: close contact shadow plus a wide, low falloff.
+        sheet:
+          "0 1px 2px rgb(31 36 48 / 0.05), 0 10px 28px -8px rgb(31 36 48 / 0.10), 0 32px 64px -28px rgb(74 58 34 / 0.18)",
       },
       borderRadius: {
         lg: "var(--radius)",
