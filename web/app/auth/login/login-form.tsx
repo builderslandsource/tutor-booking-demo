@@ -21,7 +21,7 @@ export function LoginForm() {
         </label>
         {error && <p role="alert" className="ink-note text-sm">{error}</p>}
         <button type="submit" className="btn w-full" disabled={pending} aria-busy={pending}>
-          {pending ? "Logging in..." : "Login"}
+          {pending ? "Logging in…" : "Log in"}
         </button>
       </form>
     </>

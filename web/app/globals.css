@@ -35,6 +35,15 @@
   body {
     @apply bg-paper text-ink;
   }
+  ::selection {
+    background-color: #d9d2c5; /* ruled line */
+    color: #1f2430;
+  }
+  input,
+  select {
+    caret-color: #1f2430;
+    accent-color: #1f2430;
+  }
   :focus-visible {
     outline: 2px solid #1f2430;
     outline-offset: 2px;
@@ -45,6 +54,10 @@
   /* Small spaced-out capital heading (day headings, section labels). */
   .caps {
     @apply font-serif text-sm font-medium uppercase tracking-[0.16em];
+  }
+  /* Section titles inside a screen (page titles stay in Newsreader). */
+  .section-title {
+    @apply border-b border-ink pb-2 text-lg font-semibold;
   }
   .field {
     @apply min-h-12 rounded-md border border-field bg-paper px-3 text-base text-ink;

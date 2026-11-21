@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { formatSlot } from "@/lib/time";
@@ -7,18 +8,22 @@ type Booking = { id: number; slot_start: string; student_name: string; student_e
 
 function Row({ b, timeZone, done }: { b: Booking; timeZone: string; done?: boolean }) {
   return (
-    <li className="grid gap-x-8 border-b border-rule py-3 lg:grid-cols-[21rem_minmax(0,1fr)_minmax(0,1.3fr)_9rem] lg:items-center">
+    <li className="grid gap-x-8 border-b border-rule py-3 lg:grid-cols-[21rem_minmax(0,1fr)_minmax(0,1.3fr)_13rem] lg:items-center">
       <div className={`contents ${done ? "[&>*]:line-through [&>*]:decoration-ink" : ""}`}>
         <p className="text-lg font-semibold tabular-nums lg:whitespace-nowrap">{formatSlot(b.slot_start, timeZone)}</p>
-        <p className="break-words">{b.student_name}{done && b.status === "cancelled" ? " · cancelled" : ""}</p>
+        <p className="break-words">{b.student_name}</p>
         <p className="break-words text-ink-soft">{b.student_email}</p>
       </div>
+      {done && b.status === "cancelled" && <p className="text-sm font-medium lg:justify-self-end">Cancelled</p>}
       {!done && (
-        <details className="lg:justify-self-end">
-          <summary className="text-action">Cancel</summary>
-          <form action={cancelBooking} className="inline">
+        <details className="group lg:justify-self-end">
+          <summary className="text-action list-none [&::-webkit-details-marker]:hidden">
+            <span className="group-open:hidden">Cancel</span>
+            <span className="hidden group-open:inline">Keep it</span>
+          </summary>
+          <form action={cancelBooking} className="pb-1 pt-1">
             <input type="hidden" name="id" value={b.id} />
-            <button className="btn ml-3">Yes, cancel this Booking</button>
+            <button className="btn whitespace-nowrap">Yes, cancel this Booking</button>
           </form>
         </details>
       )}
@@ -58,9 +63,9 @@ async function Bookings() {
           <ul>{later.map((b) => <Row key={b.id} b={b} timeZone={tz} />)}</ul>
         </details>
       )}
-      <h2 className="caps mt-14 border-b border-ink pb-2">Cancelled and past</h2>
+      <h2 className="section-title mt-14">Cancelled and past</h2>
       {done.length === 0 ? (
-        <p className="py-4">None yet.</p>
+        <p className="py-4 text-ink-soft">None yet.</p>
       ) : (
         <ul>{done.map((b) => <Row key={b.id} b={b} timeZone={tz} done />)}</ul>
       )}
@@ -68,11 +73,13 @@ async function Bookings() {
   );
 }
 
+export const metadata: Metadata = { title: "Bookings" };
+
 export default function BookingsPage() {
   return (
     <main className="pt-8">
       <h1 className="border-b border-ink pb-3 font-serif text-3xl lg:text-4xl">Bookings</h1>
-      <Suspense>
+      <Suspense fallback={<p className="py-8 text-ink-soft">Loading Bookings…</p>}>
         <Bookings />
       </Suspense>
     </main>

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { formatSlot, zoneCity } from "@/lib/time";
@@ -30,7 +31,13 @@ function intervalHours(v: string) {
 const input = "field min-h-11";
 const button = "btn";
 const remove = "text-action px-2";
-const sectionTitle = "border-b border-ink pb-2 font-serif text-2xl";
+const sectionTitle = "section-title";
+
+// "2026-11-27" -> "Fri 27 Nov", so a saved Exception reads like the rest of the app.
+const dayLabel = (date: string) =>
+  new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", weekday: "short", day: "numeric", month: "short" })
+    .format(new Date(`${date}T12:00:00Z`))
+    .replace(",", "");
 
 function Times({ start = "", end = "" }: { start?: string; end?: string }) {
   return (
@@ -73,7 +80,7 @@ async function OpenTime({ searchParams }: { searchParams: Promise<{ error?: stri
     <div className="space-y-12 pt-8">
       <header>
         <h1 className="border-b border-ink pb-3 font-serif text-3xl lg:text-4xl">Open time</h1>
-        <p className="mt-3 text-ink-soft">All times in {zone} time.</p>
+        <p className="mt-3 text-ink-soft">All times in {zone} time</p>
       </header>
 
       {message && (
@@ -83,7 +90,7 @@ async function OpenTime({ searchParams }: { searchParams: Promise<{ error?: stri
       )}
 
       {affected.length > 0 && (
-        <section role="alert" className="max-w-prose space-y-2 border-l-4 border-ink py-1 pl-4">
+        <section role="alert" className="max-w-prose space-y-2 border-y border-ink py-4">
           <h2 className="font-semibold">These Bookings are outside your open time:</h2>
           <ul className="tabular-nums">
             {affected.map((b) => (
@@ -114,82 +121,92 @@ async function OpenTime({ searchParams }: { searchParams: Promise<{ error?: stri
                     </button>
                   </form>
                 ))}
-              <form action={addWeekly} className="flex flex-wrap items-center gap-2">
-                <input type="hidden" name="day" value={day} />
-                <Times />
-                <button className={button}>Add</button>
-              </form>
+              <details className="group">
+                <summary className="text-action list-none [&::-webkit-details-marker]:hidden">
+                  <span className="group-open:hidden">Add hours</span>
+                  <span className="hidden group-open:inline">Close</span>
+                </summary>
+                <form action={addWeekly} className="flex flex-wrap items-center gap-2 pt-2">
+                  <input type="hidden" name="day" value={day} />
+                  <Times />
+                  <button className={button}>Add</button>
+                </form>
+              </details>
             </div>
           ))}
         </section>
 
-        <section>
-          <h2 className={sectionTitle}>Exceptions ({zone} time)</h2>
-          {exc.map((e) => (
-            <form key={e.id} action={saveException} className="flex flex-wrap items-center gap-2 border-b border-rule py-4">
-              <input type="hidden" name="id" value={e.id} />
-              <input type="date" name="date" defaultValue={e.date} required aria-label="Date" className={input} />
-              <Kind opens={e.opens} />
-              <Times start={hhmm(e.start_time)} end={hhmm(e.end_time)} />
-              <button className={button}>Save</button>
-              <button formAction={removeException} formNoValidate className={remove}>
-                Remove
-              </button>
+        <div>
+          <section>
+            <h2 className={sectionTitle}>Exceptions ({zone} time)</h2>
+            {exc.map((e) => (
+              <form key={e.id} action={saveException} className="flex flex-wrap items-center gap-2 border-b border-rule py-4">
+                <h3 className="caps w-full">{dayLabel(e.date)}</h3>
+                <input type="hidden" name="id" value={e.id} />
+                <input type="date" name="date" defaultValue={e.date} required aria-label="Date" className={input} />
+                <Kind opens={e.opens} />
+                <Times start={hhmm(e.start_time)} end={hhmm(e.end_time)} />
+                <button className={button}>Save</button>
+                <button formAction={removeException} formNoValidate className={remove}>
+                  Remove
+                </button>
+              </form>
+            ))}
+            <form action={addException} className="flex flex-wrap items-center gap-2 py-4">
+              <input type="date" name="date" required aria-label="Date" className={input} />
+              <Kind />
+              <Times />
+              <button className={button}>Add Exception</button>
             </form>
-          ))}
-          <form action={addException} className="flex flex-wrap items-center gap-2 py-4">
-            <input type="date" name="date" required aria-label="Date" className={input} />
-            <Kind />
-            <Times />
-            <button className={button}>Add Exception</button>
+          </section>
+        <section className="mt-12 max-w-prose">
+          <h2 className={sectionTitle}>Settings</h2>
+          <form action={saveSettings} className="space-y-1 py-2">
+            <label className="flex min-h-14 items-center gap-3 border-b border-rule">
+              <span className="w-40">Minimum Notice</span>
+              <input
+                type="number"
+                name="notice"
+                min={1}
+                max={336}
+                step={1}
+                required
+                defaultValue={intervalHours(settings.data.minimum_notice)}
+                className={`${input} w-24 tabular-nums`}
+              />
+              hours
+            </label>
+            <label className="flex min-h-14 items-center gap-3 border-b border-rule">
+              <span className="w-40">Booking Horizon</span>
+              <input
+                type="number"
+                name="horizon"
+                min={1}
+                max={52}
+                step={1}
+                required
+                defaultValue={Math.round(intervalHours(settings.data.booking_horizon) / 168)}
+                className={`${input} w-24 tabular-nums`}
+              />
+              weeks
+            </label>
+            <div className="pt-4">
+              <button className={button}>Save settings</button>
+            </div>
           </form>
         </section>
+        </div>
       </div>
-
-      <section className="max-w-prose">
-        <h2 className={sectionTitle}>Settings</h2>
-        <form action={saveSettings} className="space-y-1 py-2">
-          <label className="flex min-h-14 items-center gap-3 border-b border-rule">
-            <span className="w-40">Minimum Notice</span>
-            <input
-              type="number"
-              name="notice"
-              min={1}
-              max={336}
-              step={1}
-              required
-              defaultValue={intervalHours(settings.data.minimum_notice)}
-              className={`${input} w-24 tabular-nums`}
-            />
-            hours
-          </label>
-          <label className="flex min-h-14 items-center gap-3 border-b border-rule">
-            <span className="w-40">Booking Horizon</span>
-            <input
-              type="number"
-              name="horizon"
-              min={1}
-              max={52}
-              step={1}
-              required
-              defaultValue={Math.round(intervalHours(settings.data.booking_horizon) / 168)}
-              className={`${input} w-24 tabular-nums`}
-            />
-            weeks
-          </label>
-          <div className="pt-4">
-            <button className={button}>Save settings</button>
-          </div>
-        </form>
-      </section>
     </div>
   );
 }
 
+export const metadata: Metadata = { title: "Open time" };
+
 export default function OpenTimePage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   return (
     <main>
-      <Suspense>
+      <Suspense fallback={<p className="pt-8 text-ink-soft">Loading open time…</p>}>
         <OpenTime searchParams={searchParams} />
       </Suspense>
     </main>
