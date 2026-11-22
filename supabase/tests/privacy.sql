@@ -1,4 +1,4 @@
--- T7 privacy checks. Run after migrations 0001-0004:
+-- T7 privacy checks. Run after all migrations:
 --   psql -X -v ON_ERROR_STOP=1 -f supabase/tests/privacy.sql
 -- Everything runs in one transaction and is rolled back.
 begin;
@@ -143,12 +143,17 @@ begin
     exception when insufficient_privilege then null;
     end;
   end loop;
+  -- Refused outright (no grant, 0009) or allowed but no rows (row level security): both change nothing.
   foreach sql in array array[
     'update bookings set status = ''cancelled''', 'update weekly_hours set day_of_week = day_of_week',
     'update exceptions set opens = opens', 'update settings set display_name = ''Hacked''',
+    'update settings set minimum_notice = ''1 hour''',
     'delete from bookings', 'delete from weekly_hours', 'delete from exceptions'] loop
-    execute sql;
-    get diagnostics n = row_count;
+    begin
+      execute sql;
+      get diagnostics n = row_count;
+    exception when insufficient_privilege then n := 0;
+    end;
     if n > 0 then raise exception 'FAIL other user changed % rows: %', n, sql; end if;
   end loop;
   raise notice 'PASS: other user insert, update and delete change nothing';
@@ -161,17 +166,23 @@ set local role authenticated;
 set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-000000000001","role":"authenticated"}';
 
 do $$
-declare id_ bigint;
+declare id_ bigint; sql text;
 begin
   if not exists (select 1 from bookings where student_name = 'Secret Sam' and student_email = 'sam@example.com') then
     raise exception 'FAIL Tutor cannot read Booking name and email'; end if;
-  insert into bookings (slot_start, student_name, student_email) values (now() + interval '100 days', 'T', 't@example.com')
-    returning id into id_;
-  update bookings set status = 'cancelled', cancelled_at = now() where id = id_;
-  if not found then raise exception 'FAIL Tutor cannot update bookings'; end if;
-  delete from bookings where id = id_;
-  if not found then raise exception 'FAIL Tutor cannot delete bookings'; end if;
-  raise notice 'PASS: Tutor can read, insert, update and delete bookings';
+  update bookings set status = 'cancelled', cancelled_at = now() where student_name = 'Secret Sam';
+  if not found then raise exception 'FAIL Tutor cannot cancel bookings'; end if;
+  -- Bookings come only from book_slot() and are never deleted or rewritten (0009).
+  foreach sql in array array[
+    'insert into bookings (slot_start, student_name, student_email) values (now() + interval ''100 days'', ''T'', ''t@example.com'')',
+    'update bookings set student_email = ''x@example.com''', 'delete from bookings'] loop
+    begin
+      execute sql;
+      raise exception 'FAIL Tutor allowed: %', sql;
+    exception when insufficient_privilege then null;
+    end;
+  end loop;
+  raise notice 'PASS: Tutor can read and cancel bookings, not insert, rewrite or delete them';
 
   if not exists (select 1 from bookings_outside_open_time() where student_name = 'Night Nia') then
     raise exception 'FAIL Tutor cannot read bookings_outside_open_time()'; end if;
