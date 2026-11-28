@@ -79,3 +79,9 @@ Run tasks in order unless marked parallel. A task starts only when everything in
 - Needs: T11
 - Parallel: no
 - Done when: `docs/break-tests.md` records the steps and a pass result for each of the six break tests, run against the deployed URL: (1) two browsers booking the same Slot at once leave exactly one Booking; (2) Weekly Hours across a date when the clocks change give Slots at the correct local times; (3) every time on every screen carries its time zone label; (4) the Tutor screens cannot be reached without logging in; (5) junk and empty form input is rejected cleanly; (6) a cancelled Booking's Slot shows again on the booking page. It also records the core job working end to end: a Student books a Slot, the Tutor sees it, cancels it, and the Slot reopens; docs updated: the matching sections of `docs/FEATURES.md` and `docs/USER-GUIDE.md` are current and `CHANGELOG.md` has a dated line for T12.
+
+### T14: Add to calendar on the confirmation
+- Owns: `web/lib/calendar.ts`, `web/scripts/check-calendar.ts`, `web/components/booking/`, `docs/FEATURES.md`, `docs/USER-GUIDE.md`, `CHANGELOG.md`
+- Needs: none
+- Parallel: no (shares the docs files with T11 and T12)
+- Done when: `cd web && npx tsx scripts/check-calendar.ts` prints PASS for every case: a Lesson's file starts at the Slot time and ends exactly 60 minutes later, including a Lesson that starts at 00:30 UTC on 2027-03-28 when the clocks change in London; the file contains no Student name or email; `npm run lint` and `npm run build` pass; the confirmation shows an "Add to calendar" link that downloads the file; docs updated: the matching sections of `docs/FEATURES.md` and `docs/USER-GUIDE.md` are current and `CHANGELOG.md` has a dated line for T14.
