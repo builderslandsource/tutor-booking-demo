@@ -70,7 +70,7 @@ export function BookingSheet({ slots, tutor, timeZone, intro }: Props) {
   if (state.status === "booked" && state.slot) {
     return (
       <Page tutor={tutor}>
-      <section className="mx-auto max-w-3xl py-8 sm:py-6 lg:py-12" aria-live="polite">
+      <section className="py-8 sm:py-6 lg:py-12" aria-live="polite">
         <p className="text-lg text-ink-soft">You&apos;re booked for</p>
         <p className="mt-3 text-balance text-3xl font-semibold leading-tight tracking-[-0.02em] tabular-nums text-pen sm:text-4xl lg:text-5xl">
           <ZonedTime start={state.slot} timeZone={timeZone} />
@@ -88,8 +88,8 @@ export function BookingSheet({ slots, tutor, timeZone, intro }: Props) {
             </div>
           )}
         </dl>
-        <div className="mt-8 grid gap-x-10 gap-y-2 sm:grid-cols-2">
-          <p className="font-medium">No email is sent, so take a screenshot of this to keep it.</p>
+        <div className="mt-8 grid gap-y-4">
+          <p className="max-w-[60ch] font-medium">No email is sent, so take a screenshot of this to keep it.</p>
           {/* Built from the Slot and the Tutor only, never the Student's name or email. */}
           <a
             href={"data:text/calendar;charset=utf-8," + encodeURIComponent(lessonCalendarFile(state.slot, tutor))}
@@ -98,7 +98,7 @@ export function BookingSheet({ slots, tutor, timeZone, intro }: Props) {
           >
             Add to calendar
           </a>
-          <p className="text-ink-soft">To cancel, message {tutor}</p>
+          <p className="max-w-[60ch] text-ink-soft">To cancel, message {tutor}</p>
         </div>
       </section>
       </Page>
