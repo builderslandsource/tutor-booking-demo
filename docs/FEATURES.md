@@ -18,6 +18,10 @@ If two Students try for the same Slot, only the first one gets it. The other see
 After booking, the Student sees the date and time of the Lesson with its time zone, and "To cancel, message [Tutor]".
 **Why:** The Student has a clear record, and knows how to cancel, since Students cannot cancel in the app.
 
+## Add to calendar
+The confirmation has an "Add to calendar" link that downloads the Lesson as a calendar file (60 minutes from the Slot start, with the Tutor's name, and no Student name or email). The file is not updated if the Tutor later cancels.
+**Why:** No email is sent, so this gives the Student a reminder in their own calendar.
+
 ## Tutor login with lockout
 Only the Tutor can log in, with one password. There is no sign-up. After 5 wrong passwords in a row, login is locked for 15 minutes.
 **Why:** Student names and emails are private. The lockout stops someone guessing the password.
