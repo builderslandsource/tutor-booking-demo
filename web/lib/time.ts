@@ -14,7 +14,7 @@ export function formatSlot(start: Date | string, timeZone: string): string {
       .map((p) => [p.type, p.value]),
   );
   const hour = parts.hour === "0" ? "12" : parts.hour;
-  return `${parts.weekday} ${parts.day} ${parts.month}, ${hour}:${parts.minute}${parts.dayPeriod.toLowerCase()} (${zoneCity(timeZone)} time)`;
+  return `${parts.weekday} ${parts.day} ${parts.month}, ${hour}:${parts.minute}${new Date(start).getUTCHours() >= 12 ? "pm" : "am"} (${zoneCity(timeZone)} time)`;
 }
 
 // "Europe/London" -> "London", used in every "(London time)" label.
