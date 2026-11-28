@@ -85,3 +85,9 @@ Run tasks in order unless marked parallel. A task starts only when everything in
 - Needs: none
 - Parallel: no (shares the docs files with T11 and T12)
 - Done when: `cd web && npx tsx scripts/check-calendar.ts` prints PASS for every case: a Lesson's file starts at the Slot time and ends exactly 60 minutes later, including a Lesson that starts at 00:30 UTC on 2027-03-28 when the clocks change in London; the file contains no Student name or email; `npm run lint` and `npm run build` pass; the confirmation shows an "Add to calendar" link that downloads the file; docs updated: the matching sections of `docs/FEATURES.md` and `docs/USER-GUIDE.md` are current and `CHANGELOG.md` has a dated line for T14.
+
+### T15: Confirmation layout matches DESIGN-BRIEF.md §6
+- Owns: `web/components/booking/`, `docs/FEATURES.md`, `docs/USER-GUIDE.md`, `CHANGELOG.md`
+- Needs: T14
+- Parallel: no (shares the docs files with T11 and T12)
+- Done when: at 1280px wide the confirmation spans the sheet (no centred narrow column; only text blocks keep a comfortable reading width); the screenshot note, the "Add to calendar" link and "To cancel, message [Tutor]" appear in that order at both 390px and 1280px; the space between those three is at least 16px; `npm run lint` and `npm run build` pass; docs updated: the matching sections of `docs/FEATURES.md` and `docs/USER-GUIDE.md` are current and `CHANGELOG.md` has a dated line for T15.
