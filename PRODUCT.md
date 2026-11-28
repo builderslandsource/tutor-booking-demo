@@ -22,7 +22,7 @@ One Tutor's own page, not a marketplace or a scheduling product. It carries the 
 ## Operating Context
 
 - Students get the link directly from the Tutor (by message) and book in one short visit. Cancelling is done by messaging the Tutor, not on the page.
-- No emails are sent; the confirmation screen is the Student's only record of the Booking.
+- No emails are sent; the confirmation screen, and the calendar file a Student can download from it, are the Student's only record of the Booking. The file is not updated if the Tutor cancels.
 - The Tutor checks upcoming Bookings often and changes open time rarely.
 
 ## Capabilities and Constraints
@@ -30,7 +30,7 @@ One Tutor's own page, not a marketplace or a scheduling product. It carries the 
 - Screens and rules: SPEC.md. Words: GLOSSARY.md (use Tutor, Student, Lesson, Slot, Booking, Weekly Hours, Exception, Minimum Notice, Booking Horizon; avoid the listed synonyms in UI copy).
 - Stack: Next.js + Supabase on Vercel, starter app in `web/` (Tailwind and shadcn-style components already present).
 - Every time shown carries its time zone label. Students never see another Student's data.
-- Out of scope for v1: emails, payments, calendar sync, Student self-cancel, add-to-calendar, Students' own time zones.
+- Out of scope for v1: emails, payments, calendar sync, Student self-cancel, add-to-calendar anywhere except the confirmation screen's one download link, Students' own time zones.
 
 ## Brand Commitments
 

@@ -14,7 +14,7 @@ A Student books a free 60-minute Slot with their name and email. Two Students ca
 |---|---|---|
 | Booking page | anyone | See the free Slots for the next 4 weeks, one week at a time, under one clear label naming the Tutor's time zone, and pick one |
 | Booking form | anyone | Enter name and email (both required) for the chosen Slot and confirm |
-| Confirmation | anyone | See the booked date and time (with time zone) and "To cancel, message [Tutor]" |
+| Confirmation | anyone | See the booked date and time (with time zone) and "To cancel, message [Tutor]"; tap an "Add to calendar" link that downloads the Lesson as a calendar file (60 minutes from the Slot start, no Student name or email in it) |
 | Login | Tutor | Log in with the password, and log out from any Tutor screen |
 | Bookings | Tutor | See upcoming active Bookings by date and cancel any of them; see cancelled and past Bookings in a separate list |
 | Open time | Tutor | Set Weekly Hours, add or remove Exceptions, change Minimum Notice and Booking Horizon; see a warning listing any active Bookings a change affects |
@@ -50,7 +50,7 @@ Student names and emails are kept indefinitely in this version.
 - Payments and calendar sync.
 - Students cancelling their own Bookings.
 - Lesson lengths other than 60 minutes, repeating Bookings, and breaks between Lessons.
-- An "Add to calendar" button.
+- Add to calendar anywhere except the Confirmation's one download link (the file is not updated if the Booking is later cancelled).
 - The Tutor adding Bookings by hand.
 - Limits on Bookings per Student.
 - Automatic clearing of Student data (planned for version 2).
