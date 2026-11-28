@@ -15,6 +15,7 @@ const cases: [string, string, string, string][] = [
   ["midnight", "2027-01-04T00:00:00Z", L, "Mon 4 Jan, 12:00am (London time)"],
   ["Postgres timestamptz string", "2027-01-04 09:00:00+00", L, "Mon 4 Jan, 9:00am (London time)"],
   ["other zone label", "2027-01-04T22:00:00Z", "America/New_York", "Mon 4 Jan, 5:00pm (New York time)"],
+  ["morning in New York", "2027-01-04T14:00:00Z", "America/New_York", "Mon 4 Jan, 9:00am (New York time)"],
 ];
 
 let failed = 0;

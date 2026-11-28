@@ -3,7 +3,7 @@
 What the Booking Page does, and why each part is there. Students book 60-minute Lessons with one Tutor who works alone.
 
 ## Booking page
-Shows the Tutor's free Slots for the next 4 weeks, one week at a time, under one line naming the Tutor's time zone (for example "All times in London time").
+Shows the Tutor's free Slots for the next 4 weeks, one week at a time, under one line naming the Tutor's time zone (for example "All times in London time"). Times, including am or pm, are in the Tutor's time zone, so a morning Slot in New York reads 9:00am.
 **Why:** Students can see at a glance when they can book, without messages back and forth, and nobody gets confused about which time zone is meant.
 
 ## Booking form
