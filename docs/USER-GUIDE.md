@@ -2,7 +2,7 @@
 
 ## For Students
 
-1. **Booking page.** Open the site's home page. You see free times for one week, under a line saying which time zone they are in. Use **Previous week** and **Next week** to look up to 4 weeks ahead. Click a time to choose it. If nothing is free, the page asks you to message the Tutor.
+1. **Booking page.** Open the site's home page. You see free times for one week, under a line saying which time zone they are in. Times are the Tutor's own clock time, with am or pm (for example 9:00am for a morning Lesson). Use **Previous week** and **Next week** to look up to 4 weeks ahead. Click a time to choose it. If nothing is free, the page asks you to message the Tutor.
 2. **Booking form.** Enter your name and email, then confirm. If someone else took that time a moment before you, you see "This time was just taken" and the updated times. Pick another.
 3. **Confirmation.** You see the date and time of your Lesson with its time zone. Note it down: no email is sent. To cancel, message the Tutor.
 

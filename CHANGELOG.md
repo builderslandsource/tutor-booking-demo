@@ -2,6 +2,9 @@
 
 Newest first. Built from the git history.
 
+## 2026-11-27
+- Fixed (T13): morning times showed as pm when the Tutor is outside London (a 9:00am New York Slot read 9:00pm). Am or pm now follows the Tutor's time zone.
+
 ## 2026-11-22
 - Marked tasks T1 to T10 as done in the plan.
 
