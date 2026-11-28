@@ -15,7 +15,7 @@ If two Students try for the same Slot, only the first one gets it. The other see
 **Why:** A Tutor can only teach one Student at a time.
 
 ## Confirmation
-After booking, the Student sees the date and time of the Lesson with its time zone, and "To cancel, message [Tutor]".
+After booking, the Student sees the date and time of the Lesson with its time zone, and "To cancel, message [Tutor]". On a laptop the confirmation uses the full width of the sheet; under the time and the Lesson and Name, the screenshot note, the "Add to calendar" link and the cancel note follow one under another in that order, on phone and laptop.
 **Why:** The Student has a clear record, and knows how to cancel, since Students cannot cancel in the app.
 
 ## Add to calendar
