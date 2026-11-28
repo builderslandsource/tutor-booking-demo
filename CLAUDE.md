@@ -23,3 +23,4 @@ A booking page where Students book 60-minute Lessons with a Tutor who works alon
 - Only change the files the task owns. Anything not in SPEC.md is out of scope: ask first.
 - Every table that holds private data has row level security on (a database rule that limits each row to the people allowed to see it).
 - Slot rules are enforced in the database, not only in the pages.
+- Every task updates `docs/FEATURES.md`, `docs/USER-GUIDE.md` and `CHANGELOG.md` (a dated line for the task), and lists those three files in its Owns line.
