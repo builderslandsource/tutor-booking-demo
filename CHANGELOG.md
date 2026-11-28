@@ -3,6 +3,7 @@
 Newest first. Built from the git history.
 
 ## 2026-11-27
+- Added (T14): an "Add to calendar" link on the confirmation that downloads the Lesson as a calendar file (no Student name or email in it).
 - Fixed (T13): morning times showed as pm when the Tutor is outside London (a 9:00am New York Slot read 9:00pm). Am or pm now follows the Tutor's time zone.
 
 ## 2026-11-22

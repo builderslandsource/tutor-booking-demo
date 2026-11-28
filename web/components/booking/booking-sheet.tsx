@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useRef, useState, type ReactNode } from "react";
 import { book, type BookState } from "@/app/book/actions";
 import { ZonedTime } from "@/components/zoned-time";
+import { lessonCalendarFile } from "@/lib/calendar";
 import { formatSlot, zoneCity } from "@/lib/time";
 
 type Props = { slots: string[]; tutor: string; timeZone: string; intro: string };
@@ -89,6 +90,14 @@ export function BookingSheet({ slots, tutor, timeZone, intro }: Props) {
         </dl>
         <div className="mt-8 grid gap-x-10 gap-y-2 sm:grid-cols-2">
           <p className="font-medium">No email is sent, so take a screenshot of this to keep it.</p>
+          {/* Built from the Slot and the Tutor only, never the Student's name or email. */}
+          <a
+            href={"data:text/calendar;charset=utf-8," + encodeURIComponent(lessonCalendarFile(state.slot, tutor))}
+            download="lesson.ics"
+            className="btn w-full justify-self-start sm:w-auto"
+          >
+            Add to calendar
+          </a>
           <p className="text-ink-soft">To cancel, message {tutor}</p>
         </div>
       </section>
